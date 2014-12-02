@@ -7,7 +7,7 @@ function setting=getSettings(varargin)
      KbName('UnifyKeyNames')
 
      %                   notback isback
-     s.keys.nback  = KbName({'n','b'});
+     s.keys.nback  = KbName({'d','f'});
      %                  index  middle ring
      s.keys.finger = KbName({'j','k','l'});
      
@@ -15,9 +15,11 @@ function setting=getSettings(varargin)
      % MUST BE numeric
      s.keys.string = {'1','2','3'};
 
-     s.fingernames = {'right index finger',...
-                      'right middle finger',...
-                      'right ring finger'};
+     s.keys.fingernames = {...
+                      'right index finger(j)',...
+                      'right middle finger(k)',...
+                      'right ring finger(l)', ...
+                      'd','f'};
 
 
     % color for number sequences
@@ -25,10 +27,11 @@ function setting=getSettings(varargin)
     s.colors.iticross      = [0   0   0  ];
     s.colors.Fix.Nback     = [0   0   255];
     s.colors.Fix.Interfere = [255 0   0  ];
+    s.colors.bg            = s.screen.bg;
 
 
     % event settings
-    s.events.nTrl = 30;
+    s.events.nTrl = 120;
 
     s.time.Nback.wait=1.5;
     s.time.Nback.fix=1;

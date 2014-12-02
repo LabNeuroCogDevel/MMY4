@@ -3,23 +3,22 @@
 function e = genEventList(n,blocktypes)
 
       time   = getSettings('time');
-      colors = getSettings('color');
+      colors = getSettings('colors');
 
       if mod(n,2)~=0
         error('number of events is not divs by 2!')
       end
 
       types={'Nback','Interfere'};
-      if length(blocktypes)<2
+      if blocktypes<=2
          randIdx=repmat(blocktypes,1,n);
          [nbackseq, isnback] = genNbackSeq( nnz(randIdx==1) );
          intseq   = genInterfereSeq(  nnz(randIdx==2) );
 
       else
          nbmu=4; nimu=2;
-         %randIdx=Shuffle(repmat(blocktypes,1,n/2));
          [ randIdx, nbackseq, isnback, intseq ] = ...
-            genEventMixed(n,nbmu,nimu)
+            genEventMixed(n,nbmu,nimu);
       end
 
       trlTypes=types(randIdx);
@@ -41,7 +40,7 @@ function e = genEventList(n,blocktypes)
         cumtime=cumtime+e(si).duration;
 
         %% Disp + Resp
-        e(si+1).trl=t
+        e(si+1).trl=t;
         e(si+1).tt=tt;
         e(si+1).name='Rsp';
         e(si+1).onset=cumtime;

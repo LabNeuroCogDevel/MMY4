@@ -21,6 +21,7 @@ function t = event_Interfere(w,when,maxwait,seq)
 
   while GetSecs() - when <= maxwait && ~isfinite(t.seqRT)
     [key, keytime, keyCode] = KbCheck;
+    escclose(keyCode);
 
     if any(keyCode(keys.finger)) && ~isfinite(t.seqRT)
 

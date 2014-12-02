@@ -1,11 +1,14 @@
-function mmy4(subj,cb,varargin)
+% block type is 1 (nback) 2 (interf) or 3 (mixed)
+function nbackMSIT(subj,blocktype,varargin)
 
 
  s = getSettings(varargin{:});
- e = genEventList(s.events.nTrl);
+ e = genEventList(s.events.nTrl,blocktype);
 
  %try
     w=setupScreen(s.screen.bg, s.screen.res);
+
+    instructions(w);
 
     starttime= GetSecs();
     for ei=1:length(e)

@@ -30,7 +30,7 @@ function t=event_Nback(w,when,maxwait,seq,issamenback)
   t.seqKey    = Inf;
   t.seqRT     = Inf;
 
-  seq = drawSeq(w,when,seq);
+  seq = drawSeq(w,when,seq,1);
   t.onset= seq.onset;
 
   while GetSecs() - when <= maxwait && ...
@@ -38,10 +38,11 @@ function t=event_Nback(w,when,maxwait,seq,issamenback)
     [key, keytime, keyCode] = KbCheck;
 
 
+    escclose(keyCode);
 
     % is this an nback resp
     if any(keyCode(keys.nback)) && ~isfinite(t.nbackRT)
-      fprintf('\t pushed nback key\n');
+      fprintf('\t pushed nback key: ');
       t.nbackKey  = keytime;
       t.nbackRT   = keytime - t.onset;
 
@@ -49,9 +50,12 @@ function t=event_Nback(w,when,maxwait,seq,issamenback)
       if all(keyCode(keys.nback)) || ...
          ~keyCode(keys.nback(nbckKeyIdx))
         t.nbackCrct = 0;
+        fprintf('WRONG\n');
       else
         t.nbackCrct = 1;
+        fprintf('correct\n');
       end
+
 
     elseif any(keyCode(keys.finger)) && ~isfinite(t.seqRT)
       fprintf('\t pushed seq string key: ');
@@ -68,6 +72,14 @@ function t=event_Nback(w,when,maxwait,seq,issamenback)
         fprintf('correct\n');
       end
 
+      reminder=[ 'back (' keys.fingernames{5} ')'...
+                 'or not (' keys.fingernames{4} ')'];
+      [cx,cy] = RectCenter(Screen('Rect',w));
+      Screen('DrawText',w,reminder,cx-100,cy+30,0);
+
+      [v,t.reminderonset] = Screen('Flip',w,keytime,1);
+
+
     else
       continue
     end
@@ -76,6 +88,7 @@ function t=event_Nback(w,when,maxwait,seq,issamenback)
 
 
 
+  Screen('FillRect',w,colors.bg);  % clear the screen from sequence
   drawCross(w,colors.iticross)
   [v,t.clearonset] = Screen('Flip',w);
 end
