@@ -1,4 +1,5 @@
 function t = event_Interfere(w,when,maxwait,seq)
+  fprintf('\tinterference');
   keys=getSettings('keys');
   colors=getSettings('colors');
   % e.g.
@@ -25,7 +26,6 @@ function t = event_Interfere(w,when,maxwait,seq)
 
     if any(keyCode(keys.finger)) && ~isfinite(t.seqRT)
 
-      fprintf('\t pushed seq string key: ');
       t.seqKey  = keytime;
       t.seqRT   = keytime - t.onset;
 
@@ -33,11 +33,13 @@ function t = event_Interfere(w,when,maxwait,seq)
       if all(keyCode(keys.finger)) ||...
          ~keyCode(keys.finger(crctKeyIdx))
         t.seqCrct = 0;
-        fprintf('WRONG\n');
+        fprintf('\tWRONG');
       else
         t.seqCrct = 1;
-        fprintf('correct\n');
+        fprintf('\tcorrect');
       end
+
+      fprintf('\tRT: %.3f\n', t.seqRT );
 
     end
 

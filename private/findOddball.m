@@ -1,4 +1,5 @@
 % find the number that is only displayed once
+% used by interference task component
 % seq like {'1','1','2'}
 % keys like {'1','2','3'}
 function keyidx = findOddball(seq,keys) 

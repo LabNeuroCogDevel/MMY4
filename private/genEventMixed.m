@@ -13,10 +13,9 @@
 % x=n/(nbmu+nimu)*nbmu % total number nback
 % y=n/(nbmu+nimu)*nimu % total number interf
 %
-function [ randIdx, nbackseq, isnback, intseq ] = ...
-            genEventMixed(n,nbmu,nimu)
+function [ randIdx, nbackseq, isnback, intseq,nblocks ] = ...
+            genEventMixed(n,nbmu,nimu,nbnum)
   
-   nbnum  = 2;
    nNback = ceil(n/(nbmu+nimu)*nbmu);
    nInter = n-nNback; % should be close to n/(nbmu+nimu)*nimu
    minblocknum=20; % how many mini block transitions (task switches)
@@ -30,8 +29,14 @@ function [ randIdx, nbackseq, isnback, intseq ] = ...
                % but we need a min of 20 switches
    intcnt=0;
    while sum(nbckblocksof) ~= nNback 
-      nblocks=max(minblocknum,nNback/nbmu + round(2*bsizevar*rand(1)) - bsizevar);
-      nbckblocksof=ceil(exprnd(nbmu-2,nblocks,1))+2;
+      randadjust=round(2*bsizevar*rand(1)) - bsizevar;
+      
+      % dont want less than minblocks
+      % but will be varaible about the number of blocks
+      nblocks=max(minblocknum, nNback/nbmu + randadjust);
+                   
+
+      nbckblocksof=ceil(exprnd(nbmu-nbnum,nblocks,1))+nbnum;
 
       intcnt=intcnt+1;
       if intcnt > maxIterations
@@ -57,7 +62,7 @@ function [ randIdx, nbackseq, isnback, intseq ] = ...
 
    %% for nback, we need half to be same as 2 back
    % first 2 of each nback block cannot count (have to be no nback)
-   ncanbenback  = sum(nbckblocksof-nbnum)
+   ncanbenback  = sum(nbckblocksof-nbnum);
    isnback_aft2 = Shuffle(repmat(0:1,1,ceil(ncanbenback/2)));
    isnback_aft2 = isnback_aft2(1:ncanbenback);
 
@@ -81,7 +86,7 @@ function [ randIdx, nbackseq, isnback, intseq ] = ...
      isn_l=nbckblocksof(b)-1 - nbnum;
      fin_s=sum(nbckblocksof(1:b)) - fin_l ;
      isn_s=sum(nbckblocksof(1:b)-nbnum) - isn_l;
-     isnback(fin_s:(fin_s+fin_l))=[ 0 0 isnback_aft2(isn_s:(isn_s+isn_l)) ];
+     isnback(fin_s:(fin_s+fin_l))=[ repmat(0,1,nbnum) isnback_aft2(isn_s:(isn_s+isn_l)) ];
    end
    
 
@@ -181,13 +186,54 @@ end
 %  nback in a row is never less than 3
 %  keypushes are distributed
 %
-%% test number is nback
+
+
+
+
+%% test number nbacks occur half the time
 %!test
-%!  n=120; nbmu=4; nimu=2;
-%!  nNback=round(n/(nbmu+nimu)*nbmu);
-%!  [ randIdx, nbackseq, isnback, intseq ] = genEventMixed(n,nbmu,nimu)
-%!  nNbackBlock = length(nbackseq);
+%!  n=120; nbmu=4; nimu=2; nbnum=1;
+%!  [ randIdx, nbackseq, isnback, intseq, nblocks ] = genEventMixed(n,nbmu,nimu, nbnum);
 %   % half of possible nbacks are nbacks, 20 for 120:4:2
-%!  assert(nnz(isnback), (nNback - nNbackBlock*2 )/2 ) 
+%!  nNback    = round(n/(nbmu+nimu)*nbmu);
+%!  halfnBack = round((nNback - nblocks*nbnum)/2);
+%!  assert(nnz(isnback), halfnBack) 
+%!  %halfnBackAlt = round((length(isnback)/nblocks - nbnum)*nblocks/2 );
+%!  %assert(nnz(isnback), halfnBackAlt) 
+
+
+
+%% TEST nbacks are where they say they are
+%!test
+%!  n=120; nbmu=4; nimu=2; nbnum=2;
+%!  [ randIdx, nbackseq, isnback, intseq, nblocks ] = ...
+%!     genEventMixed(n,nbmu,nimu, nbnum);
+%!  seq=cellfun(@(x) findFingerInSeq(x,{'1','2','3'}), nbackseq);
+%!  isnback=find(isnback);
+%!  assert(seq(isnback),seq(isnback-nbnum));
+
+
+
+%% TEST all keys seen equally
+%!xtest
+%!  n=120; nbmu=4; nimu=2; nbnum=2;
+%!  [ randIdx, nbackseq, isnback, intseq, nblocks ] = ...
+%!     genEventMixed(n,nbmu,nimu, nbnum);
+%!  seq=cellfun(@(x) findFingerInSeq(x,{'1','2','3'}), nbackseq);
+%!  ob =cellfun(@(x) findOddball(x,{'1','2','3'}), intseq);
+%!  cnt = histc([seq' ob],1:3);
+%!  assert( max(cnt), min(cnt))
+
+
+
+%% interference key presses are equally distributed
+%!xtest
+%!  n=120; nbmu=4; nimu=2; nbnum=1;
+%!  [ randIdx, nbackseq, isnback, intseq, nblocks ] = ...
+%!      genEventMixed(n,nbmu,nimu, nbnum);
+%!  ob = cellfun(@(x) findOddball(x,{'1','2','3'}), intseq);
+%!  cnt = histc(ob,1:3);
+%   % all counts are the same
+%!   assert( max(cnt), min(cnt))
 %
 %

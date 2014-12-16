@@ -1,5 +1,7 @@
+% n-Back Multi-Source Interference
+%
 % block type is 1 (nback) 2 (interf) or 3 (mixed)
-function nbackMSIT(subj,blocktype,varargin)
+function nBMSI(subj,blocktype,varargin)
 
 
  s = getSettings(varargin{:});
