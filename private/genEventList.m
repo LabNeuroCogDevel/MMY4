@@ -13,7 +13,7 @@ function e = genEventList(n,blocktypes)
       types={'Nback','Interfere'};
 
       % used fixed -- force this -- hardcoded
-      if 1
+      if blocktypes==4
          [ randIdx, nbackseq, isnback, intseq, nblocks ] = ...
             fixedMixedSeq(1);
          length(intseq)
