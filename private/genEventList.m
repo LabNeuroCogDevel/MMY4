@@ -45,6 +45,16 @@ function e = genEventList(n,blocktypes)
         e(si).tt=tt;
         e(si).name='Fix';
         e(si).onset=cumtime;
+        e(si).duration=1;
+        e(si).func=@event_Fix;
+        e(si).params={[0 0 0]};
+        cumtime=cumtime+e(si).duration;
+
+        %% Fix
+        e(si).trl=t;
+        e(si).tt=tt;
+        e(si).name='Fix';
+        e(si).onset=cumtime;
         e(si).duration=time.(tt).fix;
         e(si).func=@event_Fix;
         e(si).params={colors.Fix.(tt)};
