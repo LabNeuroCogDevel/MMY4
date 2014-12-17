@@ -24,9 +24,6 @@ function t=event_Nback(w,when,maxwait,seq,issamenback)
 
 
 
-  t.nbackCrct = -1;
-  t.nbackKey  = Inf;
-  t.nbackRT   = Inf;
   t.seqCrct   = -1;
   t.seqKey    = Inf;
   t.seqRT     = Inf;
@@ -41,32 +38,37 @@ function t=event_Nback(w,when,maxwait,seq,issamenback)
   % 20141208 WF
   %  we are not doing sep. key press for nback
   %  so dont wait for it
-  t.nbackRT=0;
+  %t.nbackRT=0;
+  %t.nbackCrct = -1;
+  %t.nbackKey  = Inf;
+  %t.nbackRT   = Inf;
 
   while GetSecs() - when <= maxwait && ...
-        ~(isfinite(t.nbackRT) &&  isfinite(t.seqRT))
+        ~isfinite(t.seqRT)
+        %~(isfinite(t.nbackRT) &&  isfinite(t.seqRT))% 20141208
     [key, keytime, keyCode] = KbCheck;
 
 
     escclose(keyCode);
 
+    % 20141208 -- we dont have 2 button presses
     % is this an nback resp
-    if any(keyCode(keys.nback)) && ~isfinite(t.nbackRT)
-      t.nbackKey  = keytime;
-      t.nbackRT   = keytime - t.onset;
+    %if any(keyCode(keys.nback)) && ~isfinite(t.nbackRT)
+    %  t.nbackKey  = keytime;
+    %  t.nbackRT   = keytime - t.onset;
 
-      % pushed all the keys or the wrong key
-      if all(keyCode(keys.nback)) || ...
-         ~keyCode(keys.nback(nbckKeyIdx))
-        t.nbackCrct = 0;
-        fprintf('\tWRONG');
-      else
-        t.nbackCrct = 1;
-        fprintf('\tcorrect');
-      end
-
-
-    elseif any(keyCode(keys.finger)) && ~isfinite(t.seqRT)
+    %  % pushed all the keys or the wrong key
+    %  if all(keyCode(keys.nback)) || ...
+    %     ~keyCode(keys.nback(nbckKeyIdx))
+    %    t.nbackCrct = 0;
+    %    fprintf('\tWRONG');
+    %  else
+    %    t.nbackCrct = 1;
+    %    fprintf('\tcorrect');
+    %  end
+    %elseif any(keyCode(keys.finger)) && ~isfinite(t.seqRT)
+    
+    if any(keyCode(keys.finger)) && ~isfinite(t.seqRT)
       t.seqKey  = keytime;
       t.seqRT   = keytime - t.onset;
 
@@ -80,7 +82,7 @@ function t=event_Nback(w,when,maxwait,seq,issamenback)
         fprintf('\tcorrect');
       end
 
-      fprintf('\tRT: %.3f\n', t.nbackRT );
+      fprintf('\tRT: %.3f\n', t.seqRT );
 
       % 20141208 WF -- only 1 key resposne
       %   no need for reminder, removed hold screen from drawSeq too

@@ -8,6 +8,6 @@ function [seq,seqi] = genInterfereSeq(n)
   seqi  = repmat(1:nkeys,1,ceil(n/nkeys));
   seqi  = Shuffle(seqi(1:n));
 
-  seq = genInterference(seqi,keys.string)
+  seq = genInterference(seqi,keys.string);
 
 end
