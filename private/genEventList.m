@@ -22,17 +22,22 @@ function e = genEventList(n,blocktypes)
       % block of all same type
       elseif blocktypes<=3
          randIdx=repmat(blocktypes,1,n);
-         [nbackseq, isnback] = genNbackSeq( nnz(randIdx==1) );
+         [nbackseq, isnback] = genNbackSeq( nnz(randIdx==1),12,nbnum );
          intseq   = genInterfereSeq(  nnz(randIdx==2) );
          [cngrseq, discard] = genNbackSeq( nnz(randIdx==3) );
 
       % generate mixed block
-      elseif blocktypes==3
+      elseif blocktypes==4
          %nbmu=4; nimu=2;
          %[ randIdx, nbackseq, isnback, intseq, nblocks ] = ...
          %   genEventMixed(n,nbmu,nimu,nbnum);
-         [t,n,i,c]= genMixed(n,3,24,12,2);
-         randIdx=t;
+         n=120;
+         trltypes=3;
+         nminiblock=24;
+         nprobe=12;
+
+         [ttvec,nbk,inf,cng]= genMixed(n,trltypes,nminiblock,nprobe,nbnum);
+         randIdx=ttvec;
          nbackseq=nbk.seq;
          isnback =nbk.bool;
          intseq  =inf.seq;

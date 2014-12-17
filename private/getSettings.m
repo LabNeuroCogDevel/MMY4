@@ -33,13 +33,16 @@ function setting=getSettings(varargin)
 
     % event settings
     s.events.nTrl = 120;
-    s.nbnum=1; % n of the n-back
+    s.nbnum=2; % n of the n-back
 
     s.time.Nback.wait=1;
     s.time.Nback.cue=1;
 
     s.time.Interfere.wait=1;
     s.time.Interfere.cue=1;
+
+    s.time.Congruent.wait=1;
+    s.time.Congruent.cue=1;
 
     s.time.ITI.max=Inf;
     s.time.ITI.min=1;
