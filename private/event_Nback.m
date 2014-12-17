@@ -96,13 +96,7 @@ function t=event_Nback(w,when,maxwait,seq,issamenback)
 
   end
 
-  corincor={'NORESP','WRONG','correct'};
-  fprintf('\tcongruent nbk %d', issamenback);
-  fprintf('\t%s',corincor{t.seqCrct+2}); 
-  fprintf('\tRT: %.3f  ', t.seqRT );
-  fprintf('%s ', seq{:});
-  fprintf('=> %d', t.pushed );
-  fprintf('\n');
+  printRsp('Congru',t,seq,issamenback)
 
 
 

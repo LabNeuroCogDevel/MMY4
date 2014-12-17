@@ -42,13 +42,8 @@ function t = event_Interfere(w,when,maxwait,seq)
     end
 
   end
-  corincor={'NORESP','WRONG','correct'}
-  fprintf('\tinterference');
-  fprintf('\t%s',corincor{t.seqCrct+2}); 
-  fprintf('\tRT: %.3f  ', t.seqRT );
-  fprintf('%s', seq{:});
-  fprintf('=> %d', t.pushed );
-  fprintf('\n');
+
+  printRsp('Interf',t,seq,0)
 
 
   drawCross(w,colors.iticross)
