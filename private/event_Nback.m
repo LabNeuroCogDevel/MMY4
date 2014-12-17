@@ -27,6 +27,7 @@ function t=event_Nback(w,when,maxwait,seq,issamenback)
   t.seqKey    = Inf;
   t.seqRT     = Inf;
   t.pushed    = 0;
+  t.crctKey   = crctKeyIdx;
 
   if issamenback 
     seq={'X','X','X'};

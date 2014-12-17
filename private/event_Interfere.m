@@ -16,6 +16,7 @@ function t = event_Interfere(w,when,maxwait,seq)
   t.seqKey    = Inf;
   t.seqRT     = Inf;
   t.pushed    = 0;
+  t.crctKey   = crctKeyIdx;
 
   seqt = drawSeq(w,when,seq);
   t.onset= seqt.onset;

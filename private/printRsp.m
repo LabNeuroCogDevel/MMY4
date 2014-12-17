@@ -8,11 +8,11 @@ function printRsp(task,t,seq,isprobe)
   %         -1        0       1
   corincor={'NORESP','WRONG','correct'};
 
-  fprintf('\t%s',task);
+  %fprintf('\t%s',task);
   %if(isprobe); fprintf(' nbk'); end
   fprintf('\t%s',corincor{t.seqCrct+2}); 
   fprintf('\tRT: %.3f  ', t.seqRT );
   fprintf('%s ', seq{:});
-  fprintf('=> %d', t.pushed );
+  fprintf('=> %d | %d', t.crctKey, t.pushed );
   fprintf('\n');
 end

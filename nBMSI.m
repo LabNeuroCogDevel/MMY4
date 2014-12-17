@@ -26,7 +26,7 @@ function nBMSI(subj,blocktype,varargin)
       efunc  = e(ei).func;
       params = e(ei).params;
 
-      fprintf('%d %s @ %.3f\n',trl,ename,e(ei).onset);
+      fprintf('%d %s %s @ %.3f\n',trl, e(ei).tt, ename,e(ei).onset);
       res{ei}= efunc(w,onset,params{:});
       % include other useful info
       res{ei}.trl=trl;
