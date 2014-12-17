@@ -59,7 +59,7 @@ function [ttvec, nbk,inf,cng] = genMixed(N,n_etype,n_blocks,nprobe,nback)
     % get a random new position
     new=Shuffle(avail);
     % switch the bad for the new
-    nbk=mg_switchNbk(nbk,bad(1),new(1));
+    nbk = mg_switchNbk(nbk,bad(1),new(1),nback);
     %fprintf('changing %d for %d\n',bad(1),new(1));
     %s,e,find(nbk.bool)
     

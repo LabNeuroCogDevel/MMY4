@@ -1,5 +1,4 @@
 function t = event_Interfere(w,when,maxwait,seq)
-  fprintf('\tinterference');
   keys=getSettings('keys');
   colors=getSettings('colors');
   % e.g.
@@ -16,9 +15,10 @@ function t = event_Interfere(w,when,maxwait,seq)
   t.seqCrct   = -1;
   t.seqKey    = Inf;
   t.seqRT     = Inf;
+  t.pushed    = 0;
 
-  seq = drawSeq(w,when,seq);
-  t.onset= seq.onset;
+  seqt = drawSeq(w,when,seq);
+  t.onset= seqt.onset;
 
   while GetSecs() - when <= maxwait && ~isfinite(t.seqRT)
     [key, keytime, keyCode] = KbCheck;
@@ -28,22 +28,27 @@ function t = event_Interfere(w,when,maxwait,seq)
 
       t.seqKey  = keytime;
       t.seqRT   = keytime - t.onset;
+      t.pushed  = find(keyCode(keys.finger));
 
       % pushed all the keys or the wrong key
       if all(keyCode(keys.finger)) ||...
          ~keyCode(keys.finger(crctKeyIdx))
         t.seqCrct = 0;
-        fprintf('\tWRONG');
       else
         t.seqCrct = 1;
-        fprintf('\tcorrect');
       end
 
-      fprintf('\tRT: %.3f\n', t.seqRT );
 
     end
 
   end
+  corincor={'NORESP','WRONG','correct'}
+  fprintf('\tinterference');
+  fprintf('\t%s',corincor{t.seqCrct+2}); 
+  fprintf('\tRT: %.3f  ', t.seqRT );
+  fprintf('%s', seq{:});
+  fprintf('=> %d', t.pushed );
+  fprintf('\n');
 
 
   drawCross(w,colors.iticross)

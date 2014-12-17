@@ -7,7 +7,6 @@
 % sequence independent
 
 function t=event_Nback(w,when,maxwait,seq,issamenback)
-  fprintf('\tnback: %d', issamenback);
   colors = getSettings('colors');
   keys   = getSettings('keys');
   % e.g.
@@ -27,6 +26,7 @@ function t=event_Nback(w,when,maxwait,seq,issamenback)
   t.seqCrct   = -1;
   t.seqKey    = Inf;
   t.seqRT     = Inf;
+  t.pushed    = 0;
 
   if issamenback 
     seq={'X','X','X'};
@@ -71,18 +71,15 @@ function t=event_Nback(w,when,maxwait,seq,issamenback)
     if any(keyCode(keys.finger)) && ~isfinite(t.seqRT)
       t.seqKey  = keytime;
       t.seqRT   = keytime - t.onset;
+      t.pushed  = find(keyCode(keys.finger));
 
       % pushed all the keys or the wrong key
       if all(keyCode(keys.finger)) ||...
          ~keyCode(keys.finger(crctKeyIdx))
         t.seqCrct = 0;
-        fprintf('\tWRONG');
       else
         t.seqCrct = 1;
-        fprintf('\tcorrect');
       end
-
-      fprintf('\tRT: %.3f\n', t.seqRT );
 
       % 20141208 WF -- only 1 key resposne
       %   no need for reminder, removed hold screen from drawSeq too
@@ -98,6 +95,15 @@ function t=event_Nback(w,when,maxwait,seq,issamenback)
     end
 
   end
+
+  corincor={'NORESP','WRONG','correct'};
+  fprintf('\tcongruent nbk %d', issamenback);
+  fprintf('\t%s',corincor{t.seqCrct+2}); 
+  fprintf('\tRT: %.3f  ', t.seqRT );
+  fprintf('%s ', seq{:});
+  fprintf('=> %d', t.pushed );
+  fprintf('\n');
+
 
 
 
