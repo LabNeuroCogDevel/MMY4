@@ -82,6 +82,10 @@ end
 
 %%% Support Functions
 
+% switch two nbk sequences
+% hopefully move one in a bad position
+% to one in a good position
+% NB !!! if isprobe, probably has the wrong sequence!
 function nbk = switchNbk(nbk,old,new)
  for f=fieldnames(nbk)';
     f=f{1};

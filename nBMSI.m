@@ -33,8 +33,7 @@ function nBMSI(subj,blocktype,varargin)
       res{ei}.tt=e(ei).tt;
       res{ei}.name=ename;
       res{ei}.idealonset=onset;
-      res{ei}.params=params;
-      save([savename '.mat'],'res','subj','blocktype')
+      save([savename '.mat'],'res','subj','blocktype', 'e')
 
     end
     
