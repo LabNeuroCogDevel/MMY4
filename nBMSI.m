@@ -7,7 +7,7 @@ function nBMSI(subj,blocktype,varargin)
 
 
  s = getSettings('init',varargin{:});
- e = genEventList(s.events.nTrl,blocktype);
+ e = genEventList(blocktype);
  savename = formatSaveName(subj,blocktype);
 
 

@@ -1,51 +1,81 @@
 
 % block types is 1 (Nback), 2 (Interfere), or 1:2 for both
-function e = genEventList(n,blocktypes)
+function e = genEventList(blocktypes)
 
       time   = getSettings('time');
       colors = getSettings('colors');
-      nbnum  = getSettings('nbnum');
+      nbks   = getSettings('nbk');
+      events = getSettings('events');
 
-      if mod(n,2)~=0
-        error('number of events is not divs by 2!')
-      end
+      nbnum=nbks.nbnum;
 
       types={'Nback','Interfere', 'Congruent'};
 
-      % used fixed -- force this -- hardcoded
-      if blocktypes==5
-         [ randIdx, nbackseq, isnback, intseq,cngseq, nblocks ] = ...
-            fixedMixedSeq(1);
-         length(intseq)
-         n=length(randIdx);
+
+      %% build conditions
+      % if blocktype 1-3, single block
+      % if 4, mixed random
+      % if 5, mixed hardcoded
+      %
+      % also set total number of trials n based on blocktype
+      % and get random sequences for display
+
 
       % block of all same type
-      elseif blocktypes<=3
+      if blocktypes<=3
+         % single block type, use different n
+         n=s.events.nSingleBlk;
+         % set randIdx to all of the block type we wnat
          randIdx=repmat(blocktypes,1,n);
-         [nbackseq, isnback] = genNbackSeq( nnz(randIdx==1),12,nbnum );
+
+         % rather than figure out which we want
+         % generate a bunch of all
+         [nbackseq, isnback] = genNbackSeq( nnz(randIdx==1),nbks.nprobe,nbnum );
          intseq   = genInterfereSeq(  nnz(randIdx==2) );
          [cngrseq, discard] = genNbackSeq( nnz(randIdx==3) );
 
       % generate mixed block
       elseif blocktypes==4
-         %nbmu=4; nimu=2;
-         %[ randIdx, nbackseq, isnback, intseq, nblocks ] = ...
-         %   genEventMixed(n,nbmu,nimu,nbnum);
-         n=120;
-         trltypes=3;
-         nminiblock=24;
-         nprobe=12;
+         n=events.nTrl;
+         ntrltypes=length(types);
+         if mod(n,ntrltypes)~=0
+           error('number of events is not divs by %d!',ntrltypes)
+         end
+         nminiblock=events.nminblocks;
+         nprobe=nbks.nprobe;
 
-         [ttvec,nbk,inf,cng]= genMixed(n,trltypes,nminiblock,nprobe,nbnum);
+         [ttvec,nbk,inf,cng]=genMixed(n,ntrltypes,nminiblock,nprobe,nbnum);
          randIdx=ttvec;
          nbackseq=nbk.seq;
          isnback =nbk.bool;
          intseq  =inf.seq;
          cngseq  =cng.seq;
+      
+      % used fixed -- hardcoded
+      elseif blocktypes==5
+         error('no longer implemented correctly :)')
+         [ randIdx, nbackseq, isnback, intseq,cngseq, nblocks ] = ...
+            fixedMixedSeq(1);
+         length(intseq)
+         n=length(randIdx);
+
       else
          error('unknown blocktype %d',blocktyes);
       end
+      
+      %% generate ITI
 
+      exptrialtime=2; % 2 seconds is cue+probe
+      adjust=1;
+      ITIs=zeros(1,n);
+      while(abs(sum(ITIs)-(n+1)*exptrialtime) > .5 )
+       ITIs=exprnd(exptrialtime-adjust,1,n+1)+adjust;
+      end
+
+
+
+      %% build events list
+      
       trlTypes=types(randIdx);
 
       cumtime=0;
@@ -59,7 +89,7 @@ function e = genEventList(n,blocktypes)
         e(si).tt=tt;
         e(si).name='Fix';
         e(si).onset=cumtime;
-        e(si).duration=1; %TODO: random ITI
+        e(si).duration=ITIs(t); %TODO: random ITI
         e(si).func=@event_Fix;
         e(si).params={colors.iticross,0};
         cumtime=cumtime+e(si).duration;
