@@ -16,14 +16,9 @@
 %
 function [seq, isprobe, seqi] = genNbackSeq(n,nProbe,back)
   
-  fprintf('top\n')
-  n,
-  back,
-  nProbe,
-  fprintf('bottom\n')
 
   % how many back to go doesn't matter if we have no nbacks
-  if(nProbe*back==0) 
+  if(n*nProbe*back==0) 
     back   = 0;
     nProbe = 0; 
   end
