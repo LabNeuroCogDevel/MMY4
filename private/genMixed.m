@@ -16,10 +16,12 @@ function [ttvec, nbk,inf,cng] = genMixed(N,n_etype,n_blocks,nprobe,nback)
  %N=120; n_etype=3; n_blocks=24;  
  %nprobe=12; nback=2;
  t_trlblk= N/n_etype;  %40: total trials per block
- mu     = N/n_blocks; %5 : average num trials in each miniblock
- n_mini = t_trlblk/mu; %8 : number of miniblocks of each type 
+ mu      = N/n_blocks; %5 : average num trials in each miniblock
+ n_mini  = t_trlblk/mu; %8 : number of miniblocks of each type 
 
  % generate miniblock trial counts
+ %   -- this is overkill, could just make one long vector
+ %      but this way we could change the mu for each mini
  v=zeros(n_etype,n_mini);
  for i=1:n_etype;
    v(i,:) = mg_blockvec(mu,n_mini);

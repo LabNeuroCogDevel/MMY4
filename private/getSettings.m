@@ -1,11 +1,15 @@
 function setting=getSettings(varargin)
   persistent s;
+
+  % we use the first intput argument as 'init'
+  % to say we want to change or re-initialize the settings
+  isinit=( length(varargin)>0 && strncmp(varargin{1},'init',4) );
   
   % if we haven't defined s
   % or if we say 'init'
   % (re)define s
-  if isempty(s) || ...
-     ( length(varargin)>0 && strncmp(varargin{1},'init',4) )
+  if isempty(s) || isinit
+     
      s.screen.res=[800 600];
      s.screen.bg=[120 120 120];
 
@@ -38,12 +42,24 @@ function setting=getSettings(varargin)
 
     % event settings
     s.events.nTrl = 120;   % number trials
-    s.events.nSingleBlk=60;% number of trials for not mix blocks
+    s.events.nPureBlk=40;  % number of trials for not mix blocks
 
     s.events.nminblocks=24;% number of miniblocks
                            % nSwitches = nminblocks -1
-    s.nbk.nbnum=2;         % n of the n-back
-    s.nbk.nprobe=12;       % how many probes 
+
+
+
+    s.nbk.nbnum=2;          % n of the n-back
+    s.nbk.nprobe=12;        % how many probes 
+    s.nbk.pureBlkNprobe=12; % how many probes for single block
+
+
+   nbidx = find(  cellfun(...
+               @(x) ischar(x)&&strcmpi(x,'nbnum'), varargin ...
+         ))+1;
+    if isinit && nbidx
+      s.nbk.nbnum=varargin{nbidx};
+    end
 
     s.time.Nback.wait=1;
     s.time.Nback.cue=1;
@@ -61,9 +77,15 @@ function setting=getSettings(varargin)
   %% return only what we ask for
   %  or return all settings if nothing specified
   %  also return everything if we specified 'init'
-  if(length(varargin)==1 && ~ strncmp(varargin{1},'init',4) )
+  if length(varargin)==1 && ~ isinit
     setting=s.(varargin{1});
   else
     setting=s;
   end
 end
+
+%!test  % setting nbnum
+%! s=getSettings('init','nbnum',3);
+%! assert(s.nbk.nbnum==3)
+%! nbk=getSettings('nbk');
+%! assert(nbk.nbnum==3)

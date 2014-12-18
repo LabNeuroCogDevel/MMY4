@@ -1,6 +1,6 @@
 
 % block types is 1 (Nback), 2 (Interfere), or 1:2 for both
-function e = genEventList(blocktypes)
+function [e mat] = genEventList(blocktypes)
 
       time   = getSettings('time');
       colors = getSettings('colors');
@@ -13,7 +13,7 @@ function e = genEventList(blocktypes)
 
 
       %% build conditions
-      % if blocktype 1-3, single block
+      % if blocktype 1-3, pure block
       % if 4, mixed random
       % if 5, mixed hardcoded
       %
@@ -23,16 +23,25 @@ function e = genEventList(blocktypes)
 
       % block of all same type
       if blocktypes<=3
-         % single block type, use different n
-         n=s.events.nSingleBlk;
+         % pure block type, use different n
+         n=events.nPureBlk;
          % set randIdx to all of the block type we wnat
          randIdx=repmat(blocktypes,1,n);
 
-         % rather than figure out which we want
-         % generate a bunch of all
-         [nbackseq, isnback] = genNbackSeq( nnz(randIdx==1),nbks.nprobe,nbnum );
-         intseq   = genInterfereSeq(  nnz(randIdx==2) );
-         [cngrseq, discard] = genNbackSeq( nnz(randIdx==3) );
+         % generate the one we need
+         %  nnz(randIDx... will be 0 for all but the type we want
+         
+         % working memory -- nback
+         [nbk.seq, nbk.bool, nbk.seqi] = ...
+              genNbackSeq( nnz(randIdx==1),nbks.pureBlkNprobe,nbnum );
+
+         % interference -- incongruent
+         [inf.seq, int.seqi] = ...
+              genInterfereSeq( nnz(randIdx==2) );
+
+         % congruent
+         [cng.seq, junk, cng.seqi ] = ...
+              genNbackSeq( nnz(randIdx==3), 0, 0 );
 
       % generate mixed block
       elseif blocktypes==4
@@ -46,14 +55,11 @@ function e = genEventList(blocktypes)
 
          [ttvec,nbk,inf,cng]=genMixed(n,ntrltypes,nminiblock,nprobe,nbnum);
          randIdx=ttvec;
-         nbackseq=nbk.seq;
-         isnback =nbk.bool;
-         intseq  =inf.seq;
-         cngseq  =cng.seq;
       
       % used fixed -- hardcoded
       elseif blocktypes==5
          error('no longer implemented correctly :)')
+
          [ randIdx, nbackseq, isnback, intseq,cngseq, nblocks ] = ...
             fixedMixedSeq(1);
          length(intseq)
@@ -62,6 +68,19 @@ function e = genEventList(blocktypes)
       else
          error('unknown blocktype %d',blocktyes);
       end
+
+      %% format outputs for putting into events
+      %   ... accomidate old code
+      nbackseq=nbk.seq;
+      isnback =nbk.bool;
+      intseq  =inf.seq;
+      cngseq  =cng.seq;
+
+      %% mat output 
+      %   easier to parse then event structure
+      mat.nbk=nbk;
+      mat.inf=inf;
+      mat.cng=cng;
       
       %% generate ITI
 
@@ -141,3 +160,9 @@ function e = genEventList(blocktypes)
       end
 
 end
+
+%!test
+%! getSettings('init','nbnum',3);
+%! e = genEventList(4)
+%! isprobe=find(cellfun(@(x) strncmp(x,'Rsp',3), {e.name}) & cellfun(@(x) strncmp(x,'Nback',5), {e.tt}))
+%! 

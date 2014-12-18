@@ -12,10 +12,21 @@
 %  isprobe show "xxx", recall bool
 %  seqi    1-3 for what key we need to push
 %
+%TODO: no probe nback from previous probe
+%
 function [seq, isprobe, seqi] = genNbackSeq(n,nProbe,back)
   
+  fprintf('top\n')
+  n,
+  back,
+  nProbe,
+  fprintf('bottom\n')
+
   % how many back to go doesn't matter if we have no nbacks
-  if(nProbe==0);back=0; end
+  if(nProbe*back==0) 
+    back   = 0;
+    nProbe = 0; 
+  end
 
   seqs = { {'1','0','0'};
            {'0','2','0'};
