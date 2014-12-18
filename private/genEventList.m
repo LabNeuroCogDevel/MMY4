@@ -36,7 +36,7 @@ function [e mat] = genEventList(blocktypes)
               genNbackSeq( nnz(randIdx==1),nbks.pureBlkNprobe,nbnum );
 
          % interference -- incongruent
-         [inf.seq, int.seqi] = ...
+         [inf.seq, inf.seqi] = ...
               genInterfereSeq( nnz(randIdx==2) );
 
          % congruent
@@ -53,16 +53,16 @@ function [e mat] = genEventList(blocktypes)
          nminiblock=events.nminblocks;
          nprobe=nbks.nprobe;
 
-         [ttvec,nbk,inf,cng]=genMixed(n,ntrltypes,nminiblock,nprobe,nbnum);
+         [ttvec,nbk,inf,cng] = genMixed(n,ntrltypes,nminiblock,nprobe,nbnum);
          randIdx=ttvec;
       
       % used fixed -- hardcoded
       elseif blocktypes==5
          error('no longer implemented correctly :)')
 
-         [ randIdx, nbackseq, isnback, intseq,cngseq, nblocks ] = ...
+         [ randIdx, nbackseq, isnback, infseq,cngseq, nblocks ] = ...
             fixedMixedSeq(1);
-         length(intseq)
+         length(infseq)
          n=length(randIdx);
 
       else
@@ -73,7 +73,7 @@ function [e mat] = genEventList(blocktypes)
       %   ... accomidate old code
       nbackseq=nbk.seq;
       isnback =nbk.bool;
-      intseq  =inf.seq;
+      infseq  =inf.seq;
       cngseq  =cng.seq;
 
       %% mat output 
@@ -134,18 +134,24 @@ function [e mat] = genEventList(blocktypes)
 
         if strncmp('Nback',tt,5)
            seqidx=sum(randIdx(1:t)==1);
+           mat.crctkey(t)= nbk.seqi(seqidx);
+
            e(si).func=@event_Nback;
            e(si).params={time.(tt).wait, ...
                            nbackseq{seqidx},...
                            isnback(seqidx) };
         elseif strncmp('Interfere',tt,9)
            seqidx=sum(randIdx(1:t)==2);
+           mat.crctkey(t)= inf.seqi(seqidx);
+
            e(si).func=@event_Interfere;
            e(si).params={time.(tt).wait, ...
-                           intseq{seqidx} };
+                           infseq{seqidx} };
 
         elseif strncmp('Congruent',tt,9)
            seqidx=sum(randIdx(1:t)==3);
+           mat.crctkey(t)= cng.seqi(seqidx);
+
            e(si).func=@event_Nback;
            e(si).params={time.(tt).wait, ...
                            cngseq{seqidx},...
@@ -163,6 +169,6 @@ end
 
 %!test
 %! getSettings('init','nbnum',3);
-%! e = genEventList(4)
-%! isprobe=find(cellfun(@(x) strncmp(x,'Rsp',3), {e.name}) & cellfun(@(x) strncmp(x,'Nback',5), {e.tt}))
+%! [e m] = genEventList(4);
+%! %isprobe=find(cellfun(@(x) strncmp(x,'Rsp',3), {e.name}) & cellfun(@(x) strncmp(x,'Nback',5), {e.tt}))
 %! 
