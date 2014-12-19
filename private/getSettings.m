@@ -57,7 +57,7 @@ function setting=getSettings(varargin)
    nbidx = find(  cellfun(...
                @(x) ischar(x)&&strcmpi(x,'nbnum'), varargin ...
          ))+1;
-    if isinit && nbidx
+    if isinit && ~isempty(nbidx)
       s.nbk.nbnum=varargin{nbidx};
     end
 
