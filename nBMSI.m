@@ -14,7 +14,7 @@ function nBMSI(subj,blocktype,varargin)
  %try
     w=setupScreen(s.screen.bg, s.screen.res);
 
-    %instructions(w);
+    instructions(w);
 
     res=cell(1,length(e));
     starttime= GetSecs();
@@ -33,7 +33,7 @@ function nBMSI(subj,blocktype,varargin)
       res{ei}.tt=e(ei).tt;
       res{ei}.name=ename;
       res{ei}.idealonset=onset;
-      save([savename '.mat'],'res','subj','blocktype', 'e', 'emat')
+      save([savename '.mat'],'res','subj','blocktype', 'e', 'emat', 'savename');
 
     end
     

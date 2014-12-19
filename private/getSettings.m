@@ -10,7 +10,8 @@ function setting=getSettings(varargin)
   % (re)define s
   if isempty(s) || isinit
      
-     s.screen.res=[800 600];
+     %s.screen.res=[800 600];
+     s.screen.res=[1600 1200];
      s.screen.bg=[120 120 120];
 
      KbName('UnifyKeyNames')
