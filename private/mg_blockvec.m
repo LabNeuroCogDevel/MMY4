@@ -1,4 +1,11 @@
 
+%
+% create vector (length "n_mini") of exp dist numbers with mean "mu" 
+% used to set the length of each miniblock
+% eg.
+%  mg_blockvec(5,3)
+%  5 6 4  -> first block has 5 trials, second has 6, 3rd has 4 trials
+
 function v=mg_blockvec(mu,n_mini)
  maxiter=1000; % stop after 1000 attempts
 
@@ -18,9 +25,9 @@ function v=mg_blockvec(mu,n_mini)
  end
 end
 
-%!test assert (sum(mg_blockvec(5,8))==40)
 %!test assert (mean(mg_blockvec(5,8))==5)
 %!test assert (length(mg_blockvec(5,8))==8)
+%!test assert (sum(mg_blockvec(5,8))==5*8)
 %!test 
 %! v=mg_blockvec(5,8);
 %! assert (max(v)>min(v))
