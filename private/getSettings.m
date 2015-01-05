@@ -3,7 +3,7 @@ function setting=getSettings(varargin)
 
   % we use the first intput argument as 'init'
   % to say we want to change or re-initialize the settings
-  isinit=( length(varargin)>0 && strncmp(varargin{1},'init',4) );
+  isinit=( ~isempty(varargin) && strncmp(varargin{1},'init',4) );
   
   % if we haven't defined s
   % or if we say 'init'
@@ -11,7 +11,8 @@ function setting=getSettings(varargin)
   if isempty(s) || isinit
      
      %s.screen.res=[800 600];
-     s.screen.res=[1600 1200];
+     %s.screen.res=[1600 1200];
+     s.screen.res=[1280 1024];
      s.screen.bg=[120 120 120];
 
      KbName('UnifyKeyNames')
