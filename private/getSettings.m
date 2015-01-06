@@ -1,3 +1,4 @@
+% hard coded settings like color screen size, response keys
 function setting=getSettings(varargin)
   persistent s;
 
@@ -35,16 +36,17 @@ function setting=getSettings(varargin)
 
     % color for number sequences
     s.colors.seqtext       = [0   0   0  ];
-    s.colors.iticross      = [0   0   0  ];
-    s.colors.Fix.Nback     = [0   0   255];
-    s.colors.Fix.Interfere = [255 0   0  ];
-    s.colors.Fix.Congruent = [0   255 0  ];
+    s.colors.iticross      = [255 255 255];
+    s.colors.Fix.Nback     = [0   0   155];
+    s.colors.Fix.Interfere = [155 0   0  ];
+    s.colors.Fix.Congruent = [0   155 0  ];
     s.colors.bg            = s.screen.bg;
 
 
     % event settings
     s.events.nTrl = 120;   % number trials
     s.events.nPureBlk=40;  % number of trials for not mix blocks
+    s.events.nInfPureCng=4;% number of trials that will be congruent in the pure inteference block
 
     s.events.nminblocks=24;% number of miniblocks
                            % nSwitches = nminblocks -1

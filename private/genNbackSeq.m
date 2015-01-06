@@ -141,5 +141,5 @@ end
 %! genNbackSeq(8,4,2);
 
 %% fails when too many
-%!xtest 'too many probes'
+%!error 'too many probes'
 %! genNbackSeq(8,5,1);

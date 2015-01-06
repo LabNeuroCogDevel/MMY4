@@ -18,9 +18,11 @@ function keyidx = findOddball(seq,keys)
     error('could not match oddball to keys')
   end
 
+  % not an oddball
+  %   happens in pure block of interference on bea's request: 20150106WF
   oddballpos = find(seqNum==oddball);
   if oddballpos == oddball
-    error('not interference! Key index is seq number')
+    warning('not interference! Key index is seq number')
   end
   
 end
@@ -34,12 +36,12 @@ end
 %!assert ( findOddball({'3','3','1','10'},{'1','2','3'}), 1 )
 %!assert ( findOddball({'3','3','1'},{'1','2','3','4'}), 1 )
 
-% not interference errors
-%!error  findOddball({'1','3','3'},{'1','2','3'}) 
-%!error  findOddball({'1','2','1'},{'1','2','3'}) 
-%!error  findOddball({'2','2','3'},{'1','2','3'}) 
+% not interference errors -- just a warning 
+%!warning findOddball({'1','3','3'},{'1','2','3'}) 
+%!warning findOddball({'1','2','1'},{'1','2','3'}) 
+%!warning findOddball({'2','2','3'},{'1','2','3'}) 
 % other errors
-%!error  findOddball({'1','2','3'},{'1','2','3'}) % no oddball
-%!error  findOddball({'1','5','1'},{'1','2','3'}) % oddball not in keys
-%!error  findOddball({'1','5','1'},{'a','b','c'}) % keys are not nums
-%!error  findOddball({'a','5','1'},{'1','2','a'}) % more non nums
+%!error   findOddball({'1','2','3'},{'1','2','3'}) % no oddball
+%!error   findOddball({'1','5','1'},{'1','2','3'}) % oddball not in keys
+%!error   findOddball({'1','5','1'},{'a','b','c'}) % keys are not nums
+%!error   findOddball({'a','5','1'},{'1','2','a'}) % more non nums

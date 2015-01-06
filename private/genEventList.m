@@ -36,8 +36,9 @@ function [e mat] = genEventList(blocktypes)
               genNbackSeq( nnz(randIdx==1),nbks.pureBlkNprobe,nbnum );
 
          % interference -- incongruent
-         [inf.seq, inf.seqi] = ...
-              genInterfereSeq( nnz(randIdx==2) );
+         % second argument is number of "congruent" 
+         [inf.seq, inf.seqi, inf.congidx] = ...
+              genInterfereSeq( nnz(randIdx==2) , events.nInfPureCng );
 
          % congruent
          [cng.seq, junk, cng.seqi ] = ...
@@ -90,7 +91,6 @@ function [e mat] = genEventList(blocktypes)
       while(abs(sum(ITIs)-(n+1)*exptrialtime) > .5 )
        ITIs=exprnd(exptrialtime-adjust,1,n+1)+adjust;
       end
-
 
 
       %% build events list

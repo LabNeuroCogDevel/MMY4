@@ -10,6 +10,10 @@ function nBMSI(subj,blocktype,varargin)
  [e, emat] = genEventList(blocktype);
  savename = formatSaveName(subj,blocktype);
 
+ if isfield(emat.inf,'congidx')
+   fprintf('cong intference trials on:\n');
+   fprintf('\t%d\n', emat.inf.congidx);
+ end
 
  %try
     w=setupScreen(s.screen.bg, s.screen.res);
