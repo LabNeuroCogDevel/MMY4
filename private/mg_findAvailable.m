@@ -34,7 +34,34 @@ function [avail,needchange] = mg_findAvailable(s,e,nback,taken)
 end
 
 
-%!test
-%! s=[1 4 10 ]
-%! e=[3 9 11 ]
-%! [avail,needchange] = mg_findAvailable(s,e,nback,taken)
+%!test 'perfectlyConstrained'
+%                                     %  s,e,n,probeVec
+%! [avail,needchange] = mg_findAvailable(1,3,2,3);
+%! assert( isempty(needchange) )
+%! assert( isempty(avail)  )
+
+%!test 'almostAllAvail'
+%! [avail,needchange] = mg_findAvailable(5,10,2,10);
+%! assert( isempty(needchange) )
+%! assert(avail, (5+2):9  )
+
+%!test 'tooCloseToStart'
+%! [avail,needchange] = mg_findAvailable(1,5,2,[2 5]);
+%! assert(needchange,2 )
+%! assert(avail, [3,4]  )
+
+
+%!test 'double probe'
+%! [avail,needchange] = mg_findAvailable(1,5,2,[ 3 3+2 ]);
+%! assert(needchange, 5)
+%! assert(avail, 4)
+
+%!test 'tooCloseToStartInThird'
+%! nback= 2;
+% pretend blocks are  1-3, 4-9, 10-11
+%! s    = [1 4 10 ]; % block starts at 1, 4 and 10
+%! e    = [3 9 11 ]; % block ends   on 3, 9 and 11
+%! taken= [3 6 10];  % we set probes on index 3, 6,and 10
+%   10 is not 2 from 11 -- needs to be changed!
+%! [avail,needchange] = mg_findAvailable(s,e,nback,taken);
+%! assert(needchange, 10)

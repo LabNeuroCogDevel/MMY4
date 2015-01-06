@@ -23,12 +23,21 @@ function [seq, isprobe, seqi] = genNbackSeq(n,nProbe,back)
     nProbe = 0; 
   end
 
-  seqs = { {'1','0','0'};
-           {'0','2','0'};
-           {'0','0','3'} };
-  
+
+  % some things are impossible
+  if(nProbe > floor(n/2) )
+    error('cannot have %d probe with %d trials',nProbe,n)
+  end
+   
   paren = @(x, varargin) x(varargin{:});
-  nseq = length(seqs);
+
+
+  % get number of sequences from nbackSeq function
+  % ...ugly hack to make sure we can extend 
+  %    the number of sequnces 
+  %    nseq=3 as of 20150105
+  [junk,nseq] = nbackSeq([]); 
+
   % first "back" cannot be an nback
   nCanBeBack = n-back;
   seqi=ones(1,n);
@@ -37,22 +46,41 @@ function [seq, isprobe, seqi] = genNbackSeq(n,nProbe,back)
      error('%d is too many nbacks for %d trials',nProbe,n);
    end
 
-  %build matrix to sample from 
-  probemat = [repmat(0, 1, (n-nProbe-back)*2 ),  ...
-              repmat(1, 1,  nProbe*2) ];
   
-  % double it's size 
-  %probemat=repmat(probemat,1,2)
-  
-  % sampe nbacks until we dont have repeats
-  isprobe=probemat;
-  while any(diff(find(isprobe))==1) ... % no repeat nbacks
-        || length(isprobe)~=n       ... % is the correct length
-        || (back>0 && ~any(isprobe) )   % have some nbacks if we want them
+  % initialze isprobe as zeros
+  isprobe=zeros(1,n);
 
-    isprobe = [ repmat(0,1,back) paren(Shuffle( probemat  ), 1:nCanBeBack ) ];
+  % build isprobe vectors until we get what we want
+  while any(isprobe((1+back):end)==1 & isprobe(1:(end-back))) ... % no overlapping nbacks (eg back=2    1 2 X 1 X => bad! )
+        || length(isprobe)~=n     ... % is the correct length
+        || nnz(isprobe) ~= nProbe     % we have the number of probes we want
+
+    % go through all positions that we can set to an nback
+    for ipi=(back+1):n
+      % - no overlapping nbacks
+      %   eg back=2; 1 2 X 1 X => bad!
+      % - no more probes than we need
+      if(isprobe(ipi-back)) || nnz(isprobe) >= nProbe
+       isprobe(ipi)=0; % be explict here,
+                       % in case we are overwriting prev iteration
+       continue
+
+      end
+
+      % randomly set is probe
+      isprobe(ipi)=rand(1) > .5;
+
+      % % end if it's not possible to get what we need
+      % probesToGo=nProbe - nnz(isprobe(1:ipi)) ;
+      % numUnavail=sum(isprobe( (ipi-back):ipi) );
+      % posToGo=(n-ipi+1) - numUnavail;
+      % if probesToGo > posToGo       % very generous,could skip much sooner
+      %  [ probesToGo, posToGo, ipi,n]
+      %  %isprobe(1:ipi)
+      %  break
+      % end
+    end
   end
-  %isprobe,
 
   % how often is each sequence seen
   % repeat sampling until each is seen almost evenly
@@ -76,21 +104,42 @@ function [seq, isprobe, seqi] = genNbackSeq(n,nProbe,back)
      nseen=histc(seqi,1:nseq);
   end
 
-  seq=seqs(seqi);
+  seq=nbackSeq(seqi);
 end
 
 
-%%% Test nback-ness
-%!test
-%!  [seq, isprobe, seqi] = genNbackSeq(8,2,1);
-%!  pidx=find(isprobe);
-%!  assert(seqi(pidx) == seqi(pidx-1))
-%!test
-%!  [seq, isprobe, seqi] = genNbackSeq(8,2,2);
-%!  pidx=find(isprobe);
-%!  assert(seqi(pidx) == seqi(pidx-2))
-%
+%%% TESTS
+
+%% test number of probes
+%!test 'nprobe=8 and 12'
+%!  N=24;
+%!  nback=1;
+%!  for nprobe=[8 12]
+%!    [seq, isprobe, seqi] = genNbackSeq(N,nprobe,nback);
+%!    assert(nnz(isprobe), nprobe);
+%!  end
+
+%% test nbacks are valid
+%!test 'nback=1 and 2'
+%!  N=24;
+%!  nprobe=8;
+%!  for nback=[1 2]
+%!    [seq, isprobe, seqi] = genNbackSeq(N,nprobe,nback);
+%!    pidx=find(isprobe);
+%!    assert(seqi(pidx) == seqi(pidx-nback))
+%!  end
+
+
 %% works with no nback
 %!test
 %!  [seq, isprobe, seqi] = genNbackSeq(8,0,0);
 %!  assert(isempty(find(isprobe)));
+
+%% can do max
+%!test 'max probes'
+%! genNbackSeq(8,4,1);
+%! genNbackSeq(8,4,2);
+
+%% fails when too many
+%!xtest 'too many probes'
+%! genNbackSeq(8,5,1);

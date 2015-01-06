@@ -15,8 +15,8 @@
 function [ttvec, nbk,inf,cng] = genMixed(N,n_etype,n_blocks,nprobe,nback)
  %N=120; n_etype=3; n_blocks=24;  
  %nprobe=12; nback=2;
- t_trlblk= N/n_etype;  %40: total trials per block
- mu      = N/n_blocks; %5 : average num trials in each miniblock
+ t_trlblk= N/n_etype;   %40: total trials per block
+ mu      = N/n_blocks;  %5 : average num trials in each miniblock
  n_mini  = t_trlblk/mu; %8 : number of miniblocks of each type 
 
  % generate miniblock trial counts
@@ -81,7 +81,37 @@ function [ttvec, nbk,inf,cng] = genMixed(N,n_etype,n_blocks,nprobe,nback)
 end
 
 
-% test
-%  genMixed(120,3,24,12,2)
-%  s=[1    3    4   13   19   23   34   38]
-%  e=[2    3   12   18   22   33   37   40]
+%% only run once for all tests
+%!shared ttvec,nbk,inf,cng, N,n_etype,nprobe,n_blocks,nback
+%! N=120;
+%! n_etype=3;
+%! n_blocks=24;
+%! nprobe=12;
+%! nback=2;
+%                         
+%! [ttvec, nbk,inf,cng] = genMixed(N,n_etype,n_blocks,nprobe,nback);
+
+%% did we get what we asked for
+
+%!test assert (length(ttvec),N)
+
+%!test assert (nnz(nbk.bool),nprobe )
+
+
+
+%%%%%%%
+%% test probe never first of nbacks
+%% never forces recall of previous block
+%%%%%%%
+
+%!test  'no nbacks before can remember nback'
+%  % find where we are nback
+%! nbi  = find(ttvec==1); 
+%  % find starts
+%! nbit = find(nbi(2:end)-1 ~= nbi(1:(end-1)))+1;
+%  % all the indexes that first to first+back 
+%! nbit
+%! idx= reshape(   nbit + [0:(nback-1)]'   ,  1,[]);
+%  % none of the idxes are probes
+%! assert( ~any( nbk.bool(idx) ) )
+
