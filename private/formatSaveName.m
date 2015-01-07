@@ -1,4 +1,4 @@
-function savename = formatSaveName(varargin)
+function [savename,dstr] = formatSaveName(varargin)
  outdir='behave/';
  mkdir(outdir);
  % build save name from inputs
@@ -19,7 +19,7 @@ function savename = formatSaveName(varargin)
 
  % add date
  d    = datevec(now);
- dstr = [ num2str(d(1)) sprintf('%02d',d(2:5)) ]
+ dstr = [ num2str(d(1)) sprintf('%02d',d(2:5)) ];
 
  savename=[outdir name '_' dstr ];
 end

@@ -1,3 +1,6 @@
+% convert mat (or loaded mat as var) to csv (name optionally in second argument)
+% csv file has header
+% for i=dir('behave/BTC*.mat')'; behave(['behave/',i.name]), end
 function beh=behave(f,varargin)
 
  if isa(f,'char')
@@ -35,9 +38,10 @@ function beh=behave(f,varargin)
  %   - correct key, pushed key
  %   - is trl a switch?
  %   - is trl XXX
+ %   - what index was the correct key
  
  % use event list to find when we had a response event
- rsp = cellfun(@(x) ~isempty(strmatch(x,'Rsp',3)), {r.e.name});
+ rsp = cellfun(@(x) ~isempty(strmatch(x,'Rsp','exact')), {r.e.name});
 
  % grab numeric things from responses 
  for fld={'seqCrct','seqRT','pushed','crctKey'}
@@ -52,31 +56,54 @@ function beh=behave(f,varargin)
    beh.tt(idx)=i;
  end
 
-  % find out if we were in a switch
-  beh.is_switch = zeros(1,length(beh.tt));
-  beh.is_switch(find([0 diff(beh.tt)])) = 1;
+ % find out if we were in a switch
+ beh.is_switch = zeros(1,length(beh.tt));
+ beh.is_switch(find([0 diff(beh.tt)])) = 1;
 
-  % find if is nback probe
-  % -- use event param # 3 (0=norma,1=nbk probe)
-  %    get to it by finding all rsp events 
-  %    and then all the nback responses
-  %    and then the parameter of those responses
-  beh.is_probe = NA(1,length(beh.tt));
-  rspidx=find(rsp);
-  idx=rspidx(beh.tt==1);
-  isnbk = cellfun(@(x) x{3}, {r.e(idx).params });
-  beh.is_probe(beh.tt==1) = isnbk;
+ % find if is nback probe
+ % -- use event param # 3 (0=norma,1=nbk probe)
+ %    get to it by finding all rsp events 
+ %    and then all the nback responses
+ %    and then the parameter of those responses
+ beh.is_probe = nan(1,length(beh.tt));
+ rspidx=find(rsp);
+ idx=rspidx(beh.tt==1);
+ isnbk = cellfun(@(x) x{3}, {r.e(idx).params });
+ beh.is_probe(beh.tt==1) = isnbk;
 
 
-  %% save output for R n'at
-  % output name is varargin
-  if ~isempty(varargin)
-   outname=varargin{1};
+ % sequence shown to subj
+ beh.sequence=arrayfun( @(x) [x.params{2}{:}], r.e(rsp), 'UniformOutput',0);
+ beh.sequence(beh.is_probe==1) = {'XXX'};
+ 
+
+ %% save output for R n'at
+ % output name is varargin
+ % or is constructed from subject/date info
+ if ~isempty(varargin)
+  outname=varargin{1};
+
+ else
+  % at some point we started tracking the date string
+  % but if we dont have it, use the first onset time
+  if isfield(r,'dstr')
+   dstr=r.dstr;
   else
-   outname= ['behave/' r.subj '_' num2str(r.blocktype) '.csv'];
+   dstr=num2str(r.res{1}.onset);
   end
-  % write as matrix
-  % seqCrct seqRT pushed crctKey tt is_switch is_probe
-  dlmwrite(outname, cell2mat(struct2cell(beh))' )
+  outdir='behave/csv/';
+  if ~exist(outdir,'dir')
+     mkdir(outdir)
+  end
+  outname= [outdir r.subj '_' num2str(r.blocktype) '_' dstr '.csv'];
+ end
+ 
+ % write as matrix 
+ %  * 20150107WF - added sequence, not just numbers, cant do this trick
+ % seqCrct seqRT pushed crctKey tt is_switch is_probe
+ % dlmwrite(outname, cell2mat(struct2cell(beh))' )
+ 
+ writestructCSV(outname,beh);
 
+ beh.savedas=outname;
 end

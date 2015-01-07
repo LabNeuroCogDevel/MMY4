@@ -8,7 +8,7 @@ function nBMSI(subj,blocktype,varargin)
 
  s = getSettings('init',varargin{:});
  [e, emat] = genEventList(blocktype);
- savename = formatSaveName(subj,blocktype);
+ [savename,dstr] = formatSaveName(subj,blocktype);
 
  if isfield(emat.inf,'congidx')
    fprintf('cong intference trials on:\n');
@@ -37,13 +37,16 @@ function nBMSI(subj,blocktype,varargin)
       res{ei}.tt=e(ei).tt;
       res{ei}.name=ename;
       res{ei}.idealonset=onset;
-      save([savename '.mat'],'res','subj','blocktype', 'e', 'emat', 'savename');
+      save([savename '.mat'],'res','subj','blocktype', 'e', 'emat', 'savename','dstr','s');
 
     end
     
  %catch
  %  closedown()
  %end
+
+ % save output to csv file
+ behave([savename '.mat']);
 
  closedown()
 
