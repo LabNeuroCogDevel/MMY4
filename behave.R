@@ -64,8 +64,8 @@ writeBigPdf <-function(){
    dev.off()
 }
 
-writeBigCSV <-function(){
+writeBigCSV <-function(outname="behave/all.csv"){
    big <- adply(Sys.glob('behave/csv/*csv'),1,readBehave )
    big <- big[,-1] # remove "X1" from adply
-   write.table(big,file='behave/all.csv',sep=",",row.names=F)
+   write.table(big,file=outname,sep=",",row.names=F)
 }
