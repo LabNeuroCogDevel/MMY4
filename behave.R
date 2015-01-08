@@ -1,3 +1,7 @@
+# source('behave.R')
+# writeBigCSV(outname="behave/all-behavepilot.csv")
+# l<-genStats("behave/all-behavepilot.csv")
+#
 library(ggplot2)
 library(plyr)
 readBehave <- function(csvfile) {
@@ -101,6 +105,27 @@ writeBigCSV <-function( pattern='behave/csv/*csv',outname="behave/all.csv"){
 
 
 genStats <- function(csvf="behave/all.csv") {
-  big <- read.table(csvf,sep=",",header=T)
+  # get all the data, but ignore noresp
+  bigall <- read.table(csvf,sep=",",header=T)
+  big <- subset(bigall,response.type!='noresp')
+
+  # graph
+  p <- ggplot(big,aes(y=seqRT,x=trial.type,color=subj)) +
+        geom_boxplot() +
+        facet_grid(response.type~block) +
+        theme_bw() + 
+        ggtitle('RT per trialtype, colored by subj')
+
+  # stats of the bar plot
+  s <- ddply( bigall, .(trial.type, block, response.type, subj), function(x) {
+    c(RT=mean(x$seqRT),
+      n=nrow(x),
+      sd=sd(x$seqRT)
+    )
+  })
+
+  print(s)
+  print(p)
+  return(list(s,p))
 }
 
