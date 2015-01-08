@@ -93,7 +93,7 @@ writeBigPdf <-function(pattern='behave/csv/*csv',outname="behave/behave.pdf"){
 # reads in all the csv files and matching pattern and writes them to outname
 writeBigCSV <-function( pattern='behave/csv/*csv',outname="behave/all.csv"){
    allcsvfiles <- Sys.glob(pattern);
-   cat("num files to read: ", length(allcsvfiles))
+   cat("num ", pattern ," to read: ", length(allcsvfiles), "\n")
    big <- adply(allcsvfiles,1,readBehave )
    big <- big[,-1] # remove "X1" from adply
    write.table(big,file=outname,sep=",",row.names=F)
