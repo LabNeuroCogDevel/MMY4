@@ -32,9 +32,9 @@ function instructions(w,bn)
        ]}];
 
     elseif bn==3
-       instruct = {instruct{:}, ...
+       instruct = [instruct,{ ...
        [ 'blah' ] ,...
-     }
+     }];
     end 
 
     KbCheck;
