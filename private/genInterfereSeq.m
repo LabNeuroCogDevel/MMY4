@@ -1,4 +1,5 @@
 % generate seq seqi and congIdx w/help from genInterfereSeq
+% varargout{1} is index of embeded congruent trials
 function [seq,seqi, varargout] = genInterfereSeq(n, varargin)
  
   keys = getSettings('keys');
@@ -13,15 +14,23 @@ function [seq,seqi, varargout] = genInterfereSeq(n, varargin)
   
   %20150106 - want to have a few "congruent" 
   %     in interference pure block
-  if ~isempty(varargin)
+  if ~isempty(varargin) 
     nInfPureCng= varargin{1};
+   
+    % either an input error, or we want nothing
+    if nInfPureCng > n
+      if n==0
+       nInfPureCng=0
+      else
+       error('cannot have num cong (%d) > total n (%d)',nInfPureCng,n)
+      end
+    end
 
+    % generate which indexes will have the embeded congruent
     idx=Shuffle(1:n);
     idx=sort(idx(1:nInfPureCng));
     for ii=idx
       
-       %siold=seq{ii};
-       
        % congruent key is the correct key
        congpos=seqi(ii);
        % the distractor is originally in the pos idx
@@ -39,11 +48,20 @@ function [seq,seqi, varargout] = genInterfereSeq(n, varargin)
 
     end
 
+    % index of embedded congruent trials
     varargout{1} = idx;
   end
 
 end
 
+
+%!test 'can handle 0'
+%! [s,k ] = genInterfereSeq(0) ;
+%! [s,k,ci ] = genInterfereSeq(0,4) ;
+
+
+%% n_cong > n is failure
+%!error genInterfereSeq(20,30) ;
 
 %!test 'keys match expected'
 %! [s,k ] = genInterfereSeq(10) ;
