@@ -18,7 +18,7 @@ function nBMSI(subj,blocktype,varargin)
  %try
     w=setupScreen(s.screen.bg, s.screen.res);
 
-    instructions(w);
+    instructions(w,blocktype);
 
     res=cell(1,length(e));
     starttime= GetSecs();
