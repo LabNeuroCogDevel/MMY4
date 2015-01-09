@@ -4,6 +4,7 @@
 #
 library(ggplot2)
 library(plyr)
+library(reshape2)
 readBehave <- function(csvfile) {
    # read in from output of behave.m matlab script to parse *.mat
    # ... should be the csv file dumped out after a successful run
@@ -100,6 +101,14 @@ writeBigCSV <-function( pattern='behave/csv/*csv',outname="behave/all.csv"){
    cat("num ", pattern ," to read: ", length(allcsvfiles), "\n")
    big <- adply(allcsvfiles,1,readBehave )
    big <- big[,-1] # remove "X1" from adply
+
+   # define if this trial is a new miniblock
+   # ie. this trial is a switch
+   difftt <- c(0,diff(big$tt))!=0 
+   diffblk<- c(0,diff(bigall$sttime) ) !=0 
+   big$is.switch <- 1
+   big$is.switch[ difftt & !diffblk ] <- 1
+
    write.table(big,file=outname,sep=",",row.names=F)
 }
 
@@ -117,15 +126,17 @@ genStats <- function(csvf="behave/all.csv") {
         ggtitle('RT per trialtype, colored by subj')
 
   # stats of the bar plot
-  s <- ddply( bigall, .(trial.type, block, response.type, subj), function(x) {
+  s <- ddply( bigall, .(trial.type, block, response.type, subj,is.switch), function(x) {
     c(RT=mean(x$seqRT),
       n=nrow(x),
       sd=sd(x$seqRT)
     )
   })
 
+  s.switch <- reshape(subset(s,block==4),direction="wide",idvar=c("trial.type",'block','response.type','subj'),timevar='is.switch')
+
   print(s)
   print(p)
-  return(list(s,p))
+  return(list(plot=p,s=s,s.switch=s.switch))
 }
 
