@@ -40,6 +40,10 @@ function instructions(w,bn)
 
     KbCheck;
     for i = 1:length(instruct)
+      % add newlines for windows
+      if ispc
+        instruct{i}=strrep('\n','\n\n');
+      end
       DrawFormattedText(w,instruct{i},'center','center',[ 0 0 0 ]);
       Screen('Flip',w);
       WaitSecs(.5);

@@ -102,12 +102,13 @@ writeBigCSV <-function( pattern='behave/csv/*csv',outname="behave/all.csv"){
    big <- adply(allcsvfiles,1,readBehave )
    big <- big[,-1] # remove "X1" from adply
 
+   #WF20150112 -- this exists in matlab exported csv already!
    # define if this trial is a new miniblock
    # ie. this trial is a switch
-   difftt <- c(0,diff(big$tt))!=0 
-   diffblk<- c(0,diff(bigall$sttime) ) !=0 
-   big$is.switch <- 1
-   big$is.switch[ difftt & !diffblk ] <- 1
+   #difftt <- c(0,diff(big$tt))!=0 
+   #diffblk<- c(0,diff(as.numeric(big$sttime)) ) !=0 
+   #big$is_switch <- 0
+   #big$is_switch[ difftt & !diffblk ] <- 1
 
    write.table(big,file=outname,sep=",",row.names=F)
 }
@@ -118,22 +119,23 @@ genStats <- function(csvf="behave/all.csv") {
   bigall <- read.table(csvf,sep=",",header=T)
   big <- subset(bigall,response.type!='noresp')
 
+  big$is_switch   <- factor( big$is_switch, levels=c("0","1"), labels=c("consecutive","switch"))
   # graph
   p <- ggplot(big,aes(y=seqRT,x=trial.type,color=subj)) +
         geom_boxplot() +
-        facet_grid(response.type~block) +
+        facet_grid(block~is_switch+response.type) +
         theme_bw() + 
         ggtitle('RT per trialtype, colored by subj')
 
   # stats of the bar plot
-  s <- ddply( bigall, .(trial.type, block, response.type, subj,is.switch), function(x) {
+  s <- ddply( bigall, .(trial.type, block, response.type, subj,is_switch), function(x) {
     c(RT=mean(x$seqRT),
       n=nrow(x),
       sd=sd(x$seqRT)
     )
   })
 
-  s.switch <- reshape(subset(s,block==4),direction="wide",idvar=c("trial.type",'block','response.type','subj'),timevar='is.switch')
+  s.switch <- reshape(subset(s,block==4),direction="wide",idvar=c("trial.type",'block','response.type','subj'),timevar='is_switch')
 
   print(s)
   print(p)
