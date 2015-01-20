@@ -15,10 +15,10 @@ function closedown()
     %v=version;
     % global a
     %if(~isempty(a) && str2double(v(1:3))>7.9 )    
-    if PsychPortAudio('GetOpenDeviceCount')>0
-        fprintf('Closeing all Audio\n');
-        PsychPortAudio('Close');
-    end
+%     if PsychPortAudio('GetOpenDeviceCount')>0
+%         fprintf('Closeing all Audio\n');
+%         PsychPortAudio('Close');
+%     end
     
     %fprintf('Restoring priority\n');
     Priority(0);

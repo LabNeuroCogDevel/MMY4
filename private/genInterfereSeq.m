@@ -44,7 +44,9 @@ function [seq,seqi, varargout] = genInterfereSeq(n, varargin)
        % set the correct key to its position index
        seq{ii}{congpos} = num2str(congpos);
        % set the distractor to every other position
-       seq{ii}(distidxs) = distract;
+       %seq{ii}(distidxs) = distract; %works in octave, not ML 
+       % 20150108 WF - matlab safe eq. of above
+       for di=distidxs, seq{ii}{di} = distract; end
 
     end
 
