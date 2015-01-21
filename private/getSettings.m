@@ -65,13 +65,13 @@ function setting=getSettings(varargin)
       s.nbk.nbnum=varargin{nbidx};
     end
 
-    s.time.Nback.wait=1;
+    s.time.Nback.wait=1.5;
     s.time.Nback.cue=1;
 
-    s.time.Interfere.wait=1;
+    s.time.Interfere.wait=1.5;
     s.time.Interfere.cue=1;
 
-    s.time.Congruent.wait=1;
+    s.time.Congruent.wait=1.5;
     s.time.Congruent.cue=1;
 
     s.time.ITI.max=Inf;
