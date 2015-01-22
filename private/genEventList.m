@@ -11,11 +11,15 @@ function [e mat] = genEventList(blocktypes)
 
       types={'Nback','Interfere', 'Congruent'};
 
+      % all blocks greater than 4 are of type 4 (mix)
+      if blocktypes > 3; blocktypes=4; end
+
 
       %% build conditions
       % if blocktype 1-3, pure block
       % if 4, mixed random
-      % if 5, mixed hardcoded
+      % if 5,6 mixed
+      % 20150122WF 
       %
       % also set total number of trials n based on blocktype
       % and get random sequences for display
@@ -57,14 +61,15 @@ function [e mat] = genEventList(blocktypes)
          [ttvec,nbk,inf,cng] = genMixed(n,ntrltypes,nminiblock,nprobe,nbnum);
          randIdx=ttvec;
       
-      % used fixed -- hardcoded
-      elseif blocktypes==5
-         error('no longer implemented correctly :)')
+      % 20150122 WF - any num>4 is a mix block, nothing is hardcoded
+      % used fixed -- hardcoded --
+      %elseif blocktypes==5
+      %   error('no longer implemented correctly :)')
 
-         [ randIdx, nbackseq, isnback, infseq,cngseq, nblocks ] = ...
-            fixedMixedSeq(1);
-         length(infseq)
-         n=length(randIdx);
+      %   [ randIdx, nbackseq, isnback, infseq,cngseq, nblocks ] = ...
+      %      fixedMixedSeq(1);
+      %   length(infseq)
+      %   n=length(randIdx);
 
       else
          error('unknown blocktype %d',blocktyes);

@@ -24,7 +24,12 @@ function [ttvec, nbk,inf,cng] = genMixed(N,n_etype,n_blocks,nprobe,nback)
  %      but this way we could change the mu for each mini
  v=zeros(n_etype,n_mini);
  for i=1:n_etype;
-   v(i,:) = mg_blockvec(mu,n_mini);
+   if i==1;
+      minlen=nback+1;
+   else
+      minlen=1;
+   end
+   v(i,:) = mg_blockvec(mu,n_mini,minlen);
  end
 
  
@@ -43,8 +48,8 @@ function [ttvec, nbk,inf,cng] = genMixed(N,n_etype,n_blocks,nprobe,nback)
  %% generate nbacks until we meet the min probe requirement
  %  note: we might hit unusable generated miniblocks
  %   try, catch iterates through these
- probeMin = 3;
- nbkitrmax=5;
+ probeMin = getSettings('nbk').minConsProbe;
+ nbkitrmax=15;
  nbkitr=0; nbk.bool=[];
  while nnz(diff(find(nbk.bool))==1) < probeMin && nbkitr < nbkitrmax 
   try
@@ -64,7 +69,7 @@ function [ttvec, nbk,inf,cng] = genMixed(N,n_etype,n_blocks,nprobe,nback)
     [avail,bad] = mg_findAvailable(s,e,nback,find(nbk.bool));
 
     % remove all the bad with good
-    maxitr=100; itr=0;
+    maxitr=150; itr=0;
     while ~isempty(bad)
        % get a random new position
        new=Shuffle(avail);
@@ -102,14 +107,26 @@ end
 
 
 %% only run once for all tests
-%!shared ttvec,nbk,inf,cng, N,n_etype,nprobe,n_blocks,nback,nbi
-%! N=120;
+%!shared ttvec,nbk,inf,cng, N,n_etype,nprobe,n_blocks,nback,nbi,s
+
+% 20150122 - WF - before chaning to 6 runs instead of 3
+%   N=120;
+%   n_etype=3;
+%   n_blocks=24;
+%   nprobe=10;
+%   nback=2;
+
+%! s=getSettings();
+% consprobNum=  =  2; % least amount of consecutive probes
+%! N=s.events.nTrl;
 %! n_etype=3;
-%! n_blocks=24;
-%! nprobe=10;
-%! nback=2;
+%! n_blocks=s.events.nminblocks;
+%! nprobe=s.nbk.nprobe;
+%! nback=s.nbk.nbnum;
 %                         
+%                         genMixed(60,3,12,5,2); 
 %! [ttvec, nbk,inf,cng] = genMixed(N,n_etype,n_blocks,nprobe,nback);
+%
 %! nbi  = find(ttvec==1); 
 
 
@@ -121,9 +138,9 @@ end
 
 %!test assert (nnz(nbk.bool),nprobe )
 
-%!test 'have exactly 3 consecutive probes'
+%!test 'have exactly min probe number consecutive probes'
 %!  probeidxs =  find(ttvec==1) .* nbk.bool ;
-%!  assert( nnz(diff(probeidxs)==1), 3)
+%!  assert( nnz(diff(probeidxs)==1), s.nbk.minConsProbe)
 
 
 %%%%%%%
@@ -157,3 +174,12 @@ end
 %!test 'double nback-response'
 %! doubles= nbk.bool((nback+1):end) == 1 &  nbk.bool(1:(end-nback) == 1);
 %! assert( nnz(doubles), 0 )
+
+
+%!test 'smallest nbk block length is > than nback'
+% 1. take the diff of indexes to get 1 for consecutive, >1 for more
+% 2. pad diff with Inf so we can find the edges
+% 3. find indexes that are not consecutive
+% 4. get the diff between them to find length
+%! miniBlockLens = diff(  find(  [Inf diff(nbi) Inf] > 1  ) );
+%! assert( all(miniBlockLens > nback) )

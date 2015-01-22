@@ -44,18 +44,20 @@ function setting=getSettings(varargin)
 
 
     % event settings
-    s.events.nTrl = 120;   % number trials
+    s.events.nTrl    = 60;% number trials
     s.events.nPureBlk=40;  % number of trials for not mix blocks
     s.events.nInfPureCng=4;% number of trials that will be congruent in the pure inteference block
 
-    s.events.nminblocks=24;% number of miniblocks
+    s.events.nminblocks=12;% number of miniblocks
                            % nSwitches = nminblocks -1
 
 
 
     s.nbk.nbnum=2;          % n of the n-back
-    s.nbk.nprobe=10;        % how many probes 
+    s.nbk.nprobe=5;         % how many probes 
     s.nbk.pureBlkNprobe=12; % how many probes for single block
+    s.nbk.minConsProbe=  2; % least amount of consecutive probes
+    s.nbk.maxConsProbe=  2; % most amount of consecutive probes
 
 
    nbidx = find(  cellfun(...

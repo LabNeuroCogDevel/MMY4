@@ -10,7 +10,7 @@
 function [available,needchange] = mg_findAvailable(s,e,nback,taken)
 
  % min number checked in genMixed
- maxConsecutiveProbe=3;
+ maxConsecutiveProbe= getSettings('nbk').maxConsProbe;
 
  nblock=length(s);
  %maxProbes=sum(floor((e-s-1)/2)); % WF20150122 - max if no consecutive probes

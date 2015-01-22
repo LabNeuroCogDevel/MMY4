@@ -1,6 +1,11 @@
 % n-Back Multi-Source Interference
 %
-% block type is 1 (nback) 2 (interf) or 3 (mixed)
+% USAGE: nBMSI(subj,blocktype) 
+%   or   nBMSI subj blocktype
+%
+% block type is 1 (nback) 2 (interf) 3 (cong) or 4 (mixed)
+%
+% output is saved in behave/subj_block_time.mat and behave/csv/subj_block_time
 function nBMSI(subj,blocktype,varargin)
  % block type should be a number
  if ischar(blocktype), blocktype=str2num(blocktype), end
@@ -20,8 +25,11 @@ function nBMSI(subj,blocktype,varargin)
 
     instructions(w,blocktype);
 
+
+    % we start when the scanner sends the go ahead
+    starttime = getReady(w);
+
     res=cell(1,length(e));
-    starttime= GetSecs();
     for ei=1:length(e)
 
       trl    = e(ei).trl;
