@@ -34,62 +34,86 @@ function [ttvec, nbk,inf,cng] = genMixed(N,n_etype,n_blocks,nprobe,nback)
  ttvec = mg_trialTypeVec(v);
 
  %% generate sequences
- [nbk.seq, nbk.bool, nbk.seqi] = ...
-      genNbackSeq(t_trlblk,nprobe,nback);
  [inf.seq, inf.seqi] = ...
       genInterfereSeq(t_trlblk);
+
  [cng.seq, junk, cng.seqi ] = ...
       genNbackSeq(t_trlblk,0,0);
 
- 
- 
- %% hard part!
- % look through the generated nback and make sure
- % nbacks dont happen first or second
- 
- % get start and end indexes of the miniblocks
- s=[1 cumsum(v(1,1:(end-1)))+1 ];
- e=cumsum(v(1,:));
-
- % find where it's okay to have nbacks
- % and where bad ones are
- [avail,bad] = mg_findAvailable(s,e,nback,find(nbk.bool));
-
- % remove all the bad with good
- maxitr=1000; itr=0;
- while ~isempty(bad)
-    % get a random new position
-    new=Shuffle(avail);
-    % switch the bad for the new
-    nbk = mg_switchNbk(nbk,bad(1),new(1),nback);
-    %fprintf('changing %d for %d\n',bad(1),new(1));
-    %s,e,find(nbk.bool)
+ %% generate nbacks until we meet the min probe requirement
+ %  note: we might hit unusable generated miniblocks
+ %   try, catch iterates through these
+ probeMin = 3;
+ nbkitrmax=5;
+ nbkitr=0; nbk.bool=[];
+ while nnz(diff(find(nbk.bool))==1) < probeMin && nbkitr < nbkitrmax 
+  try
+    [nbk.seq, nbk.bool, nbk.seqi] = ...
+         genNbackSeq(t_trlblk,nprobe,nback);
     
-    % redo finding available/bad index
-    [avail,bad]=mg_findAvailable(s,e,nback,find(nbk.bool));
+    %% hard part!
+    % look through the generated nback and make sure
+    % nbacks dont happen first or second
+    
+    % get start and end indexes of the miniblocks
+    s=[1 cumsum(v(1,1:(end-1)))+1 ];
+    e=cumsum(v(1,:));
 
-    if isempty(avail) && ~isempty(bad)
-       error('generating nback seq: no more good indexes')
+    % find where it's okay to have nbacks
+    % and where bad ones are
+    [avail,bad] = mg_findAvailable(s,e,nback,find(nbk.bool));
+
+    % remove all the bad with good
+    maxitr=100; itr=0;
+    while ~isempty(bad)
+       % get a random new position
+       new=Shuffle(avail);
+       % switch the bad for the new
+       nbk = mg_switchNbk(nbk,bad(1),new(1),nback);
+       %fprintf('changing %d for %d\n',bad(1),new(1));
+       %s,e,find(nbk.bool)
+       
+       % redo finding available/bad index
+       [avail,bad]=mg_findAvailable(s,e,nback,find(nbk.bool));
+
+       if isempty(avail) && ~isempty(bad)
+          error('generating nback seq: no more good indexes')
+       end
+       itr=itr+1;
+       if itr>maxitr
+          error('tried %d times to fix nback seq; giving up', maxitr)
+       end
+
     end
-    itr=itr+1;
-    if itr>maxitr
-       error('tried %d times to fix nback seq; giving up', maxitr)
-    end
- end
  
+  catch ERR
+    
+    warning(ERR.message);
+    warning('hit unusuable random miniblock sequence, trying again');
+    nbkitr=nbkitr+1
+    nbk.bool=[];
+  end
+
+  if nbkitr>=nbkitrmax 
+   error('Could not generate sequence, try again')
+  end
 
 end
 
 
 %% only run once for all tests
-%!shared ttvec,nbk,inf,cng, N,n_etype,nprobe,n_blocks,nback
+%!shared ttvec,nbk,inf,cng, N,n_etype,nprobe,n_blocks,nback,nbi
 %! N=120;
 %! n_etype=3;
 %! n_blocks=24;
-%! nprobe=12;
+%! nprobe=10;
 %! nback=2;
 %                         
 %! [ttvec, nbk,inf,cng] = genMixed(N,n_etype,n_blocks,nprobe,nback);
+%! nbi  = find(ttvec==1); 
+
+
+
 
 %% did we get what we asked for
 
@@ -97,6 +121,9 @@ end
 
 %!test assert (nnz(nbk.bool),nprobe )
 
+%!test 'have exactly 3 consecutive probes'
+%!  probeidxs =  find(ttvec==1) .* nbk.bool ;
+%!  assert( nnz(diff(probeidxs)==1), 3)
 
 
 %%%%%%%
@@ -105,13 +132,28 @@ end
 %%%%%%%
 
 %!test  'no nbacks before can remember nback'
-%  % find where we are nback
-%! nbi  = find(ttvec==1); 
 %  % find starts
-%! nbit = find(nbi(2:end)-1 ~= nbi(1:(end-1)))+1;
+%! starts=find([Inf diff(nbi) ]>1);
 %  % all the indexes that first to first+back 
-%! nbit
-%! idx= reshape(   nbit + [0:(nback-1)]'   ,  1,[]);
+%  % this grabs more than nbk -- but those idxs should be cng or inf (b/c nbk is 2)
+%! idx= reshape(   starts + [0:(nback-1)]'   ,  1,[]);
+%
+% % might have block of single length at end
+%! idx=intersect(idx,1:length(nbk.bool));
 %  % none of the idxes are probes
 %! assert( ~any( nbk.bool(idx) ) )
 
+
+
+
+%!test  'no nbacks as last'
+%  % find ends
+%! nbit = find(nbi(2:end)-1 ~= nbi(1:(end-1)));
+%  % all the indexes that first to first+back 
+%  % none of the idxes are probes
+%! assert( ~any( nbk.bool(nbit) ) )
+
+
+%!test 'double nback-response'
+%! doubles= nbk.bool((nback+1):end) == 1 &  nbk.bool(1:(end-nback) == 1);
+%! assert( nnz(doubles), 0 )

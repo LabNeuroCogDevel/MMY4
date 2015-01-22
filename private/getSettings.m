@@ -54,7 +54,7 @@ function setting=getSettings(varargin)
 
 
     s.nbk.nbnum=2;          % n of the n-back
-    s.nbk.nprobe=12;        % how many probes 
+    s.nbk.nprobe=10;        % how many probes 
     s.nbk.pureBlkNprobe=12; % how many probes for single block
 
 

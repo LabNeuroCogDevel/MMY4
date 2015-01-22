@@ -9,8 +9,14 @@
 
 function [available,needchange] = mg_findAvailable(s,e,nback,taken)
 
+ % min number checked in genMixed
+ maxConsecutiveProbe=3;
+
  nblock=length(s);
- maxProbes=sum(floor((e-s-1)/2));
+ %maxProbes=sum(floor((e-s-1)/2)); % WF20150122 - max if no consecutive probes
+ maxProbes=sum(floor((e-s-1)/2)+1); % allowing for consec probes:2->2,3->2...5->3,6->4
+ maxProbes=maxProbes - max(0,nblock-maxConsecutiveProbe); % we lose the +1 for each bock if no more consec blocks
+
  if length(taken) > maxProbes
    [s;e],
    error('want %d probes, but I think the max with these %d blocks (mean length %d) is %d', ...
@@ -53,10 +59,12 @@ function [available,needchange] = mg_findAvailable(s,e,nback,taken)
 
    % remove probes we cant take from available
    blockbeforetaken = findBlockedProbes(s(i),e(i),goodtakes{i},nback,@minus);
+
+   % list all available positions for this block
    avail{i}=setdiff(probeslots,[ goodtakes{i} blockprobe blockbeforetaken] );
 
-   % TODO: kill the double probe
-
+   %% finished setting which are good (slots availabe to be picked)
+   %  now need to say which are bad   (slots picked poorly -- hopefully only initial case)
 
    %% the first nback is not as soon as possible
    musthave=s(i)+nback;
@@ -69,11 +77,38 @@ function [available,needchange] = mg_findAvailable(s,e,nback,taken)
      goodtakes{i} = goodtakes{i}( goodtakes{i} > musthave+nback ) ;
    end
 
+
+
  end
 
  % ugly hack to get cell into vector
  avail =cell2mat(cellfun( @(x) x(:),avail ,'UniformOutput',0))';
  goodtakes=cell2mat(cellfun( @(x) x(:), goodtakes,'UniformOutput',0))';
+   
+ %% if we're over max number of probes
+ %  remove consecutive probes from the good takes list 
+ consProbesI = find(diff(goodtakes)==1)+1;
+ nConsProbes = length(consProbesI);
+ while nConsProbes > maxConsecutiveProbe
+   % pick a probe in the middle, maximize space between consecutive probes
+   probeidx=consProbesI( floor(nConsProbes/2) );
+   % remove from good takes list
+   removed = goodtakes(probeidx);
+   goodtakes(probeidx)=[];
+
+   % add back +/- nback to avail
+   % actual range
+   r=[]; for xi=1:length(s), r=[r s(i):e(i)]; end
+   % add the intersect of the range and the previously 
+   % blocked-to-avoid-double-probe-resp slots
+   avail=[avail, intersect(removed + nback.*[-1,1] , r) ];
+
+   % re-callculate bounding condition variables
+   consProbesI = find(diff(goodtakes)==1)+1;
+   nConsProbes = length(consProbesI);
+ end
+
+ %% guaranty minProbes: in genMixed
 
  % all the good stuff
  ga = [goodtakes  avail ];
@@ -87,7 +122,8 @@ function [available,needchange] = mg_findAvailable(s,e,nback,taken)
  available=setdiff(avail,reserved);
 
  if length(needchange) > length(available)
-   error('have %d to change but only %d available ', needchange, available)
+   error('have %d nbk probe slots to change but only %d available ', ...
+       length(needchange), length(available) )
 
    %WF 20150121 -- this leads to endless looping in genMixed
    %  % redo them all
@@ -119,8 +155,9 @@ function blockprobe = findBlockedProbes(s,e,takes,nback,varargin)
 
    blockprobe=[];
    if ~isempty(takes)
-     return % dont care about consecutive probe (WF20150121)
-     %nbmask   = repmat([1:nback]',1,length(takes)); %WF20150121- this means no double probe
+     %return % dont care about consecutive probe (WF20150121)
+     nbmask   = repmat(nback,1,length(takes))';  % just look for double probes
+     %nbmask   = repmat([1:nback]',1,length(takes)); %WF20150121- this means no probe within nback from any other probe
      blockprobe= bsxfun(func,takes,nbmask);
      % only makes sense to block what is in the range of possible selection
      blockprobe=blockprobe(blockprobe>=s&blockprobe<=e)';
@@ -139,7 +176,7 @@ end
 %! [avail,needchange] = mg_findAvailable([1 10],[4 17],2,[3 12 16]);
 %! assert( isempty(needchange) )
 
-%!test 'double probe'
+%!test 'change double probe'
 %! [avail,needchange] = mg_findAvailable(1,7,2,[ 3 3+2 ]);
 %! assert(needchange, 5)
 %! assert(avail, [4 6])
@@ -154,7 +191,8 @@ end
 %!test 'almostAllAvail'
 %! [avail,needchange] = mg_findAvailable(3,12,2,[11]);
 %! assert( isempty(needchange) )
-%! assert(avail, [5 8]  )
+%! %assert(avail, [5 8]  ) % if we only allow . . X . . X, not X X . . X 
+%! assert(avail, [5 8 10]  )  % allowing consecutive probe
 
 %!test 'does not start with nback probe'
 %! [avail,needchange] = mg_findAvailable(1,5,2,[4]);
@@ -176,9 +214,10 @@ end
 %! assert(needchange,[2,9] )
 %! assert(avail, [3 6 7 8]  )
 
-%!test 'dont reinclude back blocked probes'
-%! [avail,needchange] = mg_findAvailable([1 10],[5 11],2,[3]);
-%! assert(~any(avail==4))
+%20150122 WF - if using idx 3, 4 is now usable (b/c we allow consecutive probes now)
+% %!test 'dont reinclude back blocked probes'
+% %! [avail,needchange] = mg_findAvailable([1 10],[5 11],2,[3]);
+% %! assert(~any(avail==4))
 
 
 %!test 'tooCloseToStartInThird'
@@ -190,3 +229,9 @@ end
 %   10 is not 2 from 11 -- needs to be changed!
 %! [avail,needchange] = mg_findAvailable(s,e,nback,taken);
 %! assert(needchange, 20)
+
+
+%!test 'tooManyConsecutiveProbes'
+%! [avail,needchange] = mg_findAvailable(1,30,2,[ 3 4 7 8 11 12 15 16]);
+%! assert(length(needchange),1) % dont care which one we try to change, just that we change it
+
