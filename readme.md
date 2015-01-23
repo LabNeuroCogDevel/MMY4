@@ -6,7 +6,7 @@ in `octave` or `matlab` with [`PTB`](http://psychtoolbox.org/download/)
 
 ```matlab
 subj='subjname' % subjectname for matfile
-runtype=3       % 1=nback,2=interference,3=mixed, 4=hard coded sequence
+runtype=3       % 1=nback,2=interference,3=cong, >=4 mixed
 
 nBMSI(subj,runtype)
 ```
@@ -27,3 +27,8 @@ cd MMY4
 ## Citations
 * MSIT: http://www.nature.com/nprot/journal/v1/n1/full/nprot.2006.48.html
 * PTB: ??
+
+## transfer/copying
+```bash
+rsync -nrhi /mnt/usb/MMY4/ ~/src/MMY4 --size-only
+```
