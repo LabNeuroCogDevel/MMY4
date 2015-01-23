@@ -50,10 +50,18 @@ function [seq, isprobe, seqi] = genNbackSeq(n,nProbe,back)
   % initialze isprobe as zeros
   isprobe=zeros(1,n);
 
+  nbksettings = getSettings('nbk');
+  consProbeMax= nbksettings.maxConsProbe;
+  consProbeMin= nbksettings.minConsProbe
+
+  % added code, but commented 20150123 WF
+  consProbeCnt=0;
   % build isprobe vectors until we get what we want
   while any(isprobe((1+back):end)==1 & isprobe(1:(end-back))) ... % no overlapping nbacks (eg back=2    1 2 X 1 X => bad! )
         || length(isprobe)~=n     ... % is the correct length
-        || nnz(isprobe) ~= nProbe     % we have the number of probes we want
+        || nnz(isprobe) ~= nProbe ... % we have the number of probes we want
+        %|| consProbeCnt < consProbeMin ... % consectuive count is >= min
+        %|| consProbeCnt > consProbeMax ... % consectuive count is <= max
 
     % go through all positions that we can set to an nback
     for ipi=(back+1):n
@@ -80,6 +88,10 @@ function [seq, isprobe, seqi] = genNbackSeq(n,nProbe,back)
       %  break
       % end
     end
+
+
+    %consProbeCnt = nnz(isprobe(2:end)==1 & isprobe(1:(end-1)))
+
   end
 
   % how often is each sequence seen
