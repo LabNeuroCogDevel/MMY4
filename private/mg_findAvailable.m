@@ -10,7 +10,8 @@
 function [available,needchange] = mg_findAvailable(s,e,nback,taken)
 
  % min number checked in genMixed
- maxConsecutiveProbe= getSettings('nbk').maxConsProbe;
+ nbksettings = getSettings('nbk');
+ maxConsecutiveProbe= nbksettings.maxConsProbe;
 
  nblock=length(s);
  %maxProbes=sum(floor((e-s-1)/2)); % WF20150122 - max if no consecutive probes
@@ -53,7 +54,7 @@ function [available,needchange] = mg_findAvailable(s,e,nback,taken)
    % do we have any goodtakes overlapping with blocked probe positions
    % ...we should remove those from good takes
    uglytakes = intersect(inrangetakes,blockprobe);
-   goodtakes(i) =setdiff(inrangetakes, uglytakes);
+   goodtakes{i} =setdiff(inrangetakes, uglytakes);
    % redo finding blocked probes -- remove the blocked probes from bad takes
    blockprobe = findBlockedProbes(s(i),e(i),goodtakes{i},nback);
 

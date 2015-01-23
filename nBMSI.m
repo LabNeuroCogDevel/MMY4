@@ -12,7 +12,14 @@ function nBMSI(subj,blocktype,varargin)
 
 
  s = getSettings('init',varargin{:});
+ 
+ %20150123 - WF+SM@MRRC 
+ %  cd to private b/c genEvent depends on functions in that directory 
+ %  ML2011a (MR version):  private/function.m does not have access to other functions in private/
+ cd private
  [e, emat] = genEventList(blocktype);
+ cd ..
+ 
  [savename,dstr] = formatSaveName(subj,blocktype);
 
  if isfield(emat.inf,'congidx')
@@ -55,7 +62,7 @@ function nBMSI(subj,blocktype,varargin)
 
  % save output to csv file
  behave([savename '.mat']);
-
+ goodJob(w);
  closedown()
 
 end

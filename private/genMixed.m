@@ -48,7 +48,8 @@ function [ttvec, nbk,inf,cng] = genMixed(N,n_etype,n_blocks,nprobe,nback)
  %% generate nbacks until we meet the min probe requirement
  %  note: we might hit unusable generated miniblocks
  %   try, catch iterates through these
- probeMin = getSettings('nbk').minConsProbe;
+ nbksetting = getSettings('nbk');
+ probeMin = nbksetting.minConsProbe;
  nbkitrmax=15;
  nbkitr=0; nbk.bool=[];
  while nnz(diff(find(nbk.bool))==1) < probeMin && nbkitr < nbkitrmax 

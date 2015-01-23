@@ -11,17 +11,21 @@ function setting=getSettings(varargin)
   % (re)define s
   if isempty(s) || isinit
      
-     %s.screen.res=[800 600];
-     %s.screen.res=[1600 1200];
-     s.screen.res=[1280 1024];
+     %s.screen.res=[800 600];   % any computer, testing
+     %s.screen.res=[1600 1200]; % will's computer
+     %s.screen.res=[1280 1024]; % test computer in Loeff
+     s.screen.res=[1024 768];   % MRCTR
      s.screen.bg=[120 120 120];
 
      KbName('UnifyKeyNames')
 
-     %                   notback isback
-     s.keys.nback  = KbName({'d','f'});
+     %                   notback isback -- 201501 -- no more nback keypush
+     %s.keys.nback  = KbName({'d','f'});
+     
+     
      %                  index  middle ring
-     s.keys.finger = KbName({'j','k','l'});
+     %s.keys.finger = KbName({'j','k','l'}); % TESTING
+     s.keys.finger = KbName({'2@','3#','4$'}); % ACTUAL
      
      % string corresponding to finger
      % MUST BE numeric

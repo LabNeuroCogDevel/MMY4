@@ -1,4 +1,3 @@
-
 %
 % create vector (length "n_mini") of exp dist numbers with mean "mu" 
 % used to set the length of each miniblock
