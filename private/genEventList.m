@@ -89,12 +89,12 @@ function [e mat] = genEventList(blocktypes)
       mat.cng=cng;
       
       %% generate ITI
-
-      exptrialtime=2; % 2 seconds is cue+probe
-      adjust=1;
+      %  fixation time should be about equal to task time
+      %  NB. will wait full resp time after button push, so fix time will be greater
+      adjust=time.ITI.min; % how to adjust exp dist
       ITIs=zeros(1,n);
-      while(abs(sum(ITIs)-(n+1)*exptrialtime) > .5 )
-       ITIs=exprnd(exptrialtime-adjust,1,n+1)+adjust;
+      while(abs(sum(ITIs)-(n+1)*time.ITI.mu) > .5 )
+       ITIs=exprnd( time.ITI.mu - adjust ,1,n+1) + adjust; % min value is adjust
       end
 
 
@@ -113,7 +113,7 @@ function [e mat] = genEventList(blocktypes)
         e(si).tt=tt;
         e(si).name='Fix';
         e(si).onset=cumtime;
-        e(si).duration=ITIs(t); %TODO: random ITI
+        e(si).duration=ITIs(t); 
         e(si).func=@event_Fix;
         e(si).params={colors.iticross,0};
         cumtime=cumtime+e(si).duration;

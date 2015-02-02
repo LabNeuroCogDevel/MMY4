@@ -82,6 +82,13 @@ function setting=getSettings(varargin)
 
     s.time.ITI.max=Inf;
     s.time.ITI.min=1;
+
+    % fixation time should be about equal to task time
+    %
+    % 2.5 seconds is cue+probe for nback
+    %  others could be different, hopefully nback is close to average
+    %  for this block :)
+    s.time.ITI.mu = s.time.Nback.wait + s.time.Nback.cue;
   end
 
   %% return only what we ask for
