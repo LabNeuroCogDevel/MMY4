@@ -4,6 +4,7 @@
 %  n_bocks    total number of mini blocks
 %
 %20141217 - initial
+%20150217 - move nbk logic to nbkMatchSettings
 %
 % generate a mixed block of N trials
 % with n_etype mini block types
@@ -45,64 +46,8 @@ function [ttvec, nbk,inf,cng] = genMixed(N,n_etype,n_blocks,nprobe,nback)
  [cng.seq, junk, cng.seqi ] = ...
       genNbackSeq(t_trlblk,0,0);
 
- %% generate nbacks until we meet the min probe requirement
- %  note: we might hit unusable generated miniblocks
- %   try, catch iterates through these
- nbksetting = getSettings('nbk');
- probeMin = nbksetting.minConsProbe;
- nbkitrmax=15;
- nbkitr=0; nbk.bool=[];
- while nnz(diff(find(nbk.bool))==1) < probeMin && nbkitr < nbkitrmax 
-  try
-    [nbk.seq, nbk.bool, nbk.seqi] = ...
-         genNbackSeq(t_trlblk,nprobe,nback);
-    
-    %% hard part!
-    % look through the generated nback and make sure
-    % nbacks dont happen first or second
-    
-    % get start and end indexes of the miniblocks
-    s=[1 cumsum(v(1,1:(end-1)))+1 ];
-    e=cumsum(v(1,:));
 
-    % find where it's okay to have nbacks
-    % and where bad ones are
-    [avail,bad] = mg_findAvailable(s,e,nback,find(nbk.bool));
-
-    % remove all the bad with good
-    maxitr=150; itr=0;
-    while ~isempty(bad)
-       % get a random new position
-       new=Shuffle(avail);
-       % switch the bad for the new
-       nbk = mg_switchNbk(nbk,bad(1),new(1),nback);
-       %fprintf('changing %d for %d\n',bad(1),new(1));
-       %s,e,find(nbk.bool)
-       
-       % redo finding available/bad index
-       [avail,bad]=mg_findAvailable(s,e,nback,find(nbk.bool));
-
-       if isempty(avail) && ~isempty(bad)
-          error('generating nback seq: no more good indexes')
-       end
-       itr=itr+1;
-       if itr>maxitr
-          error('tried %d times to fix nback seq; giving up', maxitr)
-       end
-
-    end
- 
-  catch ERR
-    
-    warning(ERR.message);
-    warning('hit unusuable random miniblock sequence, trying again');
-    nbkitr=nbkitr+1
-    nbk.bool=[];
-  end
-
-  if nbkitr>=nbkitrmax 
-   error('Could not generate sequence, try again')
-  end
+ nbk = nbkMatchSettings(t_trlblk,nprobe,nback,v);
 
 end
 
