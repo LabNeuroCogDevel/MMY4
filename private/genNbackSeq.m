@@ -1,6 +1,9 @@
 %  genNbackSeq - generate nback sequences of lenght n
 %     NO BACK-TO-BACK RECALLS (20141215)
 %
+%  see nbkMatchSettings for more restricted output
+%
+%
 % input
 %  n       number of inputs to generate
 %  nProbe  number of recalls/probes 
@@ -11,8 +14,6 @@
 %  sequene cell of strings
 %  isprobe show "xxx", recall bool
 %  seqi    1-3 for what key we need to push
-%
-%TODO: no probe nback from previous probe
 %
 function [seq, isprobe, seqi] = genNbackSeq(n,nProbe,back)
   
@@ -50,9 +51,6 @@ function [seq, isprobe, seqi] = genNbackSeq(n,nProbe,back)
   % initialze isprobe as zeros
   isprobe=zeros(1,n);
 
-  nbksettings = getSettings('nbk');
-  consProbeMax= nbksettings.maxConsProbe;
-  consProbeMin= nbksettings.minConsProbe
 
   % added code, but commented 20150123 WF
   consProbeCnt=0;

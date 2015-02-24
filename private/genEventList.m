@@ -36,8 +36,7 @@ function [e mat] = genEventList(blocktypes)
          %  nnz(randIDx... will be 0 for all but the type we want
          
          % working memory -- nback
-         [nbk.seq, nbk.bool, nbk.seqi] = ...
-              genNbackSeq( nnz(randIdx==1),nbks.pureBlkNprobe,nbnum );
+         nbk = nbkMatchSettings( nnz(randIdx==1),nbks.pureBlkNprobe,nbnum,[] );
 
          % interference -- incongruent
          % second argument is number of "congruent" 
