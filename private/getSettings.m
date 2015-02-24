@@ -12,25 +12,38 @@ function setting=getSettings(varargin)
   if isempty(s) || isinit
 
      %% get host name and set info related to it
-     [returned,host] = system('hostname');
-     host=strtrim(host);
-     host(host=='-')='_';
+     %% we can also specify a host name as a (second) option
+     if length(varargin)<2
+        [returned,host] = system('hostname');
+        host=strtrim(host);
+        host(host=='-')='_';
+     else 
+        host = varargin{2};
+     end 
 
      s.host.name = host;
-     if strmatch(host,'Admin_PC')
+     if strncmp(host,'Admin_PC',8)
       s.host.type='MR';
       s.host.isMR=1;
       s.host.isBehave=0;
+      s.host.isMEG=0;
+      s.screen.res=[1024 768];   % MRCTR
+     elseif strncmp(host,'MEGPC',5)
+      s.host.type='MEG';
+      s.host.isMR=0;
+      s.host.isBehave=1;
+      s.host.isMEG=1;
      else
       s.host.type='behave';
       s.host.isMR=0;
       s.host.isBehave=1;
+      s.host.isMEG=0;
      end
 
      
      %s.screen.res=[800 600];   % any computer, testing
      %s.screen.res=[1600 1200]; % will's computer
-     %s.screen.res=[1280 1024]; % test computer in Loeff
+     %s.screen.res=[1280 1024]; %test computer in Loeff
      s.screen.res=[1024 768];   % MRCTR
      s.screen.bg=[120 120 120];
 
@@ -93,10 +106,10 @@ function setting=getSettings(varargin)
     s.time.Nback.wait=1.5;
     s.time.Nback.cue=.5;
 
-    s.time.Interfere.wait=1.5;
+    s.time.Interfere.wait=1.3;
     s.time.Interfere.cue=.5;
 
-    s.time.Congruent.wait=1.5;
+    s.time.Congruent.wait=1;
     s.time.Congruent.cue=.5;
 
     s.time.ITI.max=Inf;
@@ -116,6 +129,14 @@ function setting=getSettings(varargin)
                          s.time.Interfere.wait;
                          s.time.Congruent.wait]) ...
                      + s.time.Nback.cue;
+
+   % for meg and behave, iti can be fixed at .5
+   if s.host.isBehave
+      s.time.ITI.min= .5;
+      s.time.ITI.mu = .5;
+      s.time.ITI.end= 0;
+   end
+
   end
 
   %% return only what we ask for

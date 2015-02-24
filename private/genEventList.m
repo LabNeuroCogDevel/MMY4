@@ -90,11 +90,8 @@ function [e mat] = genEventList(blocktypes)
       %% generate ITI
       %  fixation time should be about equal to task time
       %  NB. will wait full resp time after button push, so fix time will be greater
-      adjust=time.ITI.min; % how to adjust exp dist
-      ITIs=zeros(1,n);
-      while(abs(sum(ITIs)-(n+1)*time.ITI.mu) > .5 )
-       ITIs=exprnd( time.ITI.mu - adjust ,1,n+1) + adjust; % min value is adjust
-      end
+      %WF20150224 -- move into function
+      ITIs=genITI(n,time.ITI.mu,time.ITI.min);
 
 
       %% build events list
