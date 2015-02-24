@@ -1,14 +1,16 @@
-function MRstart = getReady(w)
+function MRstart = getReady(w,varargin)
+ 
+   % varargin will be isMR
+   % if we aren't MR, we dont have to get ready
+   if length(varargin)>0 && ~varargin{1}
+    MRstart = GetSecs();
+    return 
+   end
 
    DrawFormattedText(w, 'Get Ready! (Waiting for scanner to start)', ...
          'center','center');
 
    Screen('Flip', w);
-
-   if ~ispc
-    MRstart = GetSecs();
-    return 
-   end
 
    scannerTR=0;
 

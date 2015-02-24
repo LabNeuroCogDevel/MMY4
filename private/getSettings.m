@@ -10,6 +10,23 @@ function setting=getSettings(varargin)
   % or if we say 'init'
   % (re)define s
   if isempty(s) || isinit
+
+     %% get host name and set info related to it
+     [returned,host] = system('hostname');
+     host=strtrim(host);
+     host(host=='-')='_';
+
+     s.host.name = host;
+     if strmatch(host,'Admin_PC')
+      s.host.type='MR';
+      s.host.isMR=1;
+      s.host.isBehave=0;
+     else
+      s.host.type='behave';
+      s.host.isMR=0;
+      s.host.isBehave=1;
+     end
+
      
      %s.screen.res=[800 600];   % any computer, testing
      %s.screen.res=[1600 1200]; % will's computer
@@ -19,13 +36,14 @@ function setting=getSettings(varargin)
 
      KbName('UnifyKeyNames')
 
-     %                   notback isback -- 201501 -- no more nback keypush
-     %s.keys.nback  = KbName({'d','f'});
-     
-     
-     %                  index  middle ring
-     %s.keys.finger = KbName({'j','k','l'}); % TESTING
-     s.keys.finger = KbName({'2@','3#','4$'}); % ACTUAL
+     % use fingers:  index  middle ring
+     if s.host.isMR
+       % Button Glove index: middle, ring
+       s.keys.finger = KbName({'2@','3#','4$'}); 
+     else
+       %s.keys.finger = KbName({'j','k','l'}); % TESTING
+       s.keys.finger = KbName({'LeftArrow','DownArrow','RightArrow'}); 
+     end
      
      % string corresponding to finger
      % MUST BE numeric
@@ -48,9 +66,10 @@ function setting=getSettings(varargin)
 
 
     % event settings
-    s.events.nTrl    = 60;% number trials
-    s.events.nPureBlk=40;  % number of trials for not mix blocks
-    s.events.nInfPureCng=4;% number of trials that will be congruent in the pure inteference block
+    s.events.nTrl    = 60; % number trials
+    s.events.nPureBlk= 30; % number of trials for not mix blocks
+    s.events.nInfPureCng=4;% number of trials that will be congruent
+                           %   in the pure inteference block
 
     s.events.nminblocks=12;% number of miniblocks
                            % nSwitches = nminblocks -1
@@ -72,23 +91,31 @@ function setting=getSettings(varargin)
     end
 
     s.time.Nback.wait=1.5;
-    s.time.Nback.cue=1;
+    s.time.Nback.cue=.5;
 
     s.time.Interfere.wait=1.5;
-    s.time.Interfere.cue=1;
+    s.time.Interfere.cue=.5;
 
     s.time.Congruent.wait=1.5;
-    s.time.Congruent.cue=1;
+    s.time.Congruent.cue=.5;
 
     s.time.ITI.max=Inf;
     s.time.ITI.min=1;
 
+    % how long to wait at the end of the block
+    s.time.ITI.end=12;
+
     % fixation time should be about equal to task time
     %
     % 2.5 seconds is cue+probe for nback
-    %  others could be different, hopefully nback is close to average
-    %  for this block :)
-    s.time.ITI.mu = s.time.Nback.wait + s.time.Nback.cue;
+    % WF20150224 - cue to .5 now 2 sec ITI mu
+    % WF20150224 -  pure blocks will be off by .3 secs * 30 (ntrials)
+    %               but we add 12 secs of ITI at the end
+    %               so efficiency should be okay still ? 
+    s.time.ITI.mu = mean([s.time.Nback.wait;
+                         s.time.Interfere.wait;
+                         s.time.Congruent.wait]) ...
+                     + s.time.Nback.cue;
   end
 
   %% return only what we ask for

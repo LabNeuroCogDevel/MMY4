@@ -16,9 +16,10 @@ function nBMSI(subj,blocktype,varargin)
  %20150123 - WF+SM@MRRC 
  %  cd to private b/c genEvent depends on functions in that directory 
  %  ML2011a (MR version):  private/function.m does not have access to other functions in private/
- cd private
+ sOctave = exist('OCTAVE_VERSION', 'builtin') ~= 0;
+ if(~sOctave);cd private;end
  [e, emat] = genEventList(blocktype);
- cd ..
+ if(~sOctave);cd ..;end
  
  [savename,dstr] = formatSaveName(subj,blocktype);
 
@@ -34,7 +35,7 @@ function nBMSI(subj,blocktype,varargin)
 
 
     % we start when the scanner sends the go ahead
-    starttime = getReady(w);
+    starttime = getReady(w,s.host.isMR);
 
     res=cell(1,length(e));
     for ei=1:length(e)
@@ -56,13 +57,29 @@ function nBMSI(subj,blocktype,varargin)
 
     end
     
+
+    
+    % draw final fixation for s.endITI seconds
+    % then say good job
+    lastonset = event_Fix(w,GetSecs(), s.colors.iticross);
+    lastonset = lastonset.onset;
+    endtime=lastonset+s.time.ITI.end;
+
+    save([savename '.mat'],'res','subj','blocktype', 'e', 'emat', 'savename','dstr','s', 'endtime','lastonset');
+
+    fprintf('xx END ITI @ %0.3f for %0.2f\n',lastonset-starttime, s.time.ITI.end);
+    fprintf('xx GOOD JOB @ %0.3f\n',endtime-starttime);
+    goodJob(w,endtime);
+
+    % save output to csv file
+    behave([savename '.mat']);
+
+    % shut it all down
+    closedown()
+
  %catch
  %  closedown()
  %end
 
- % save output to csv file
- behave([savename '.mat']);
- goodJob(w);
- closedown()
 
 end

@@ -1,9 +1,6 @@
 function instructions(w,bn)
     
     keys=getSettings('keys');
-    % s.keys.nback  = KbName({'n','b'});
-    % %                  index  middle ring
-    % s.keys.finger = KbName({'j','k','l'});
     instruct = {...
     [ ...
 %      'You are going to play a number matching game.\n\n',...
