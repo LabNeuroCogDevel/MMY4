@@ -80,7 +80,7 @@ function setting=getSettings(varargin)
 
     % event settings
     s.events.nTrl    = 60; % number trials
-    s.events.nPureBlk= 30; % number of trials for not mix blocks
+    s.events.nPureBlk= 35; % number of trials for not mix blocks
     s.events.nInfPureCng=4;% number of trials that will be congruent
                            %   in the pure inteference block
 
