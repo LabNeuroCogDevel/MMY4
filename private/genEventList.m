@@ -12,7 +12,7 @@ function [e mat] = genEventList(blocktypes)
       types={'Nback','Interfere', 'Congruent'};
 
       % all blocks greater than 4 are of type 4 (mix)
-      if blocktypes > 3; blocktypes=4; end
+      % if blocktypes > 3; blocktypes=4; end
 
 
       %% build conditions
@@ -26,7 +26,7 @@ function [e mat] = genEventList(blocktypes)
 
 
       % block of all same type
-      if blocktypes<=3
+      if blocktypes<=3 && blocktypes>0
          % pure block type, use different n
          n=events.nPureBlk;
          % set randIdx to all of the block type we wnat
@@ -48,7 +48,7 @@ function [e mat] = genEventList(blocktypes)
               genNbackSeq( nnz(randIdx==3), 0, 0 );
 
       % generate mixed block
-      elseif blocktypes==4
+      elseif blocktypes>=4 || blocktyes==0
          n=events.nTrl;
          ntrltypes=length(types);
          if mod(n,ntrltypes)~=0
