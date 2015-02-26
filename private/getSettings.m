@@ -21,6 +21,9 @@ function setting=getSettings(varargin)
         host = varargin{2};
      end 
 
+     % behave true => fixed .5sec ITI
+     % MR          => show getready screen
+     % MEG         => send trigger codes and photodiode
      s.host.name = host;
      if strncmp(host,'Admin_PC',8)
       s.host.type='MR';
@@ -28,23 +31,32 @@ function setting=getSettings(varargin)
       s.host.isBehave=0;
       s.host.isMEG=0;
       s.screen.res=[1024 768];   % MRCTR
+      fprintf('running MR\n');
      elseif strncmp(host,'MEGPC',5)
       s.host.type='MEG';
       s.host.isMR=0;
       s.host.isBehave=1;
       s.host.isMEG=1;
-     else
-      s.host.type='behave';
+      s.screen.res=[1024 768]; 
+     elseif strncmp(host,'upmc_56ce704785',15)
+      s.host.type='Behave';
       s.host.isMR=0;
       s.host.isBehave=1;
       s.host.isMEG=0;
+      s.screen.res=[1440 900];
+     else
+      s.host.type='Unknown';
+      s.host.isMR=0;
+      s.host.isBehave=1;
+      s.host.isMEG=0;
+      s.screen.res=[1024 768];   
      end
+     fprintf('screen res: %d %d %s\n',s.screen.res,s.host.name);
 
      
      %s.screen.res=[800 600];   % any computer, testing
      %s.screen.res=[1600 1200]; % will's computer
      %s.screen.res=[1280 1024]; %test computer in Loeff
-     s.screen.res=[1024 768];   % MRCTR
      s.screen.bg=[120 120 120];
 
      KbName('UnifyKeyNames')
