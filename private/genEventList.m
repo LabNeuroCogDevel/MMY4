@@ -1,5 +1,6 @@
 
-% block types is 1 (Nback), 2 (Interfere), or 1:2 for both
+% block types is -1 or 1 (Nback), -2 or 2 (Interfere), -3 or 3 (Cong), 0 or >=4 (Mix)
+%
 function [e mat] = genEventList(blocktypes)
 
       time   = getSettings('time');
@@ -12,7 +13,10 @@ function [e mat] = genEventList(blocktypes)
       types={'Nback','Interfere', 'Congruent'};
 
       % all blocks greater than 4 are of type 4 (mix)
-      % if blocktypes > 3; blocktypes=4; end
+      % negative block types are practice
+      % 0 is practice mix
+      blocktypes=abs(blocktypes);
+      if blocktypes > 3 || blocktypes == 0; blocktypes=4; end
 
 
       %% build conditions
@@ -26,7 +30,7 @@ function [e mat] = genEventList(blocktypes)
 
 
       % block of all same type
-      if blocktypes<=3 && blocktypes>0
+      if blocktypes<=3
          % pure block type, use different n
          n=events.nPureBlk;
          % set randIdx to all of the block type we wnat
@@ -48,7 +52,8 @@ function [e mat] = genEventList(blocktypes)
               genNbackSeq( nnz(randIdx==3), 0, 0 );
 
       % generate mixed block
-      elseif blocktypes>=4 || blocktyes==0
+      %  blocktypes transforemed at top of file to be between 1 and 4
+      elseif blocktypes==4
          n=events.nTrl;
          ntrltypes=length(types);
          if mod(n,ntrltypes)~=0
