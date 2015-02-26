@@ -35,7 +35,7 @@ function nBMSI(subj,blocktype,varargin)
 
 
     % we start when the scanner sends the go ahead
-    starttime = getReady(w,s.host.isMR);
+    starttime = getReady(w,s.host.type);
 
     res=cell(1,length(e));
     for ei=1:length(e)
@@ -72,10 +72,12 @@ function nBMSI(subj,blocktype,varargin)
     goodJob(w,endtime);
 
     % save output to csv file
-    behave([savename '.mat']);
+    beh=behave([savename '.mat']);
+
+    behaveStats(beh);
 
     % shut it all down
-    closedown()
+    closedown();
 
  %catch
  %  closedown()

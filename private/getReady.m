@@ -2,24 +2,35 @@ function MRstart = getReady(w,varargin)
  
    % varargin will be isMR
    % if we aren't MR, we dont have to get ready
-   if length(varargin)>0 && ~varargin{1}
+   if isempty(varargin) || strncmp(varargin{1},'Unknown',7)
     MRstart = GetSecs();
     return 
    end
 
-   DrawFormattedText(w, 'Get Ready! (Waiting for scanner to start)', ...
-         'center','center');
+   if strncmp(varargin{1},'MR',2)
+    disptext='Get Ready! (Waiting for scanner to start)';
+    keyidx = KbName('=+');
+   elseif strncmp(varargin{1},'MEG',2)
+    disptext='Get Ready! (Waiting for channel checks)';
+    keyidx = 1:256;
+   % elseif strncmp(varargin{1},'Behave',6)
+   else
+    disptext='Ready?!';
+    keyidx = 1:256;
+   end
 
+
+   DrawFormattedText(w,disptex,'center','center');
    Screen('Flip', w);
 
-   scannerTR=0;
+   ready=0;
 
-   fprintf('waiting for scanner "=" keyboard event\n');
+   % fprintf('waiting for scanner "=" keyboard event\n');
    % wait for scanner to send "=" as a keyboard event
-   while(~scannerTR)
+   while(~ready)
        [keyPressed, MRstart, keyCode] = KbCheck;
-       if keyPressed && keyCode(KbName('=+')  )
-           scannerTR=1;
+       if keyPressed && any(keyCode(keyidx)  )
+           ready=1;
        end
    end
 

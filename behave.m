@@ -1,6 +1,7 @@
 % convert mat (or loaded mat as var) to csv (name optionally in second argument)
 % csv file has header
 % for i=dir('behave/BTC*.mat')'; behave(['behave/',i.name]), end
+% if second argument is 'nowrite', will not write a file
 function beh=behave(f,varargin)
 
  if isa(f,'char')
@@ -42,6 +43,11 @@ function beh=behave(f,varargin)
  
  % use event list to find when we had a response event
  rsp = cellfun(@(x) ~isempty(strmatch(x,'Rsp','exact')), {r.e.name});
+ 
+ % cuts off good trials - WF20150226
+ % if we exited early, we dont have all of rsp so truncate to what we have
+ %dididx = cellfun(@(x) ~isempty(x), r.res(rsp) );
+ %rsp=rsp(dididx);
 
  % grab numeric things from responses 
  for fld={'seqCrct','seqRT','pushed','crctKey'}
@@ -75,6 +81,10 @@ function beh=behave(f,varargin)
  % sequence shown to subj
  beh.sequence=arrayfun( @(x) [x.params{2}{:}], r.e(rsp), 'UniformOutput',0);
  beh.sequence(beh.is_probe==1) = {'XXX'};
+
+ %add trial number and onset time
+ beh.trialno    = cellfun(@(x) x.trl, r.res(rsp) );
+ beh.rsponset = cellfun(@(x) x.onset, r.res(rsp) );
  
 
  %% save output for R n'at
@@ -103,7 +113,9 @@ function beh=behave(f,varargin)
  % seqCrct seqRT pushed crctKey tt is_switch is_probe
  % dlmwrite(outname, cell2mat(struct2cell(beh))' )
  
- writestructCSV(outname,beh);
+ if ~strncmp(outname,'nowrite',7)
+    writestructCSV(outname,beh);
+ end
 
  beh.savedas=outname;
 end

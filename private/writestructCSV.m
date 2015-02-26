@@ -34,7 +34,7 @@ function writestructCSV(outname,beh)
       end
       % write it
       fprintf(fid, fmt, v); 
-      % put commas as long as its not the last line
+      % put commas as long as its not the last column 
       if fi ~= colcnt
        fprintf(fid,',');
       end 
