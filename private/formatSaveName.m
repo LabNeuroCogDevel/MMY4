@@ -1,6 +1,18 @@
+% formatSaveName(<subj>,<block>,...)
+% make a name with variable inputs like:
+%  1/1_2_YYYYMMDDHHmm where 1 and 2 are the inputs to the funtion
+%  also return date string YYYYMMDDHHmm 
 function [savename,dstr] = formatSaveName(varargin)
  outdir='behave/';
  mkdir(outdir);
+
+ % first input should be subject id (esp. if we have more than one input)
+ % make subject a directory
+ if length(varargin)>1
+   outdir=[ outdir varargin{1} '/' ]
+   mkdir(outdir)
+ end
+
  % build save name from inputs
  % put a _ between each
  name='';

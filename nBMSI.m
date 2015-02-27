@@ -76,7 +76,7 @@ function nBMSI(subj,blocktype,varargin)
     goodJob(w,endtime);
 
     % save output to csv file
-    beh=behave([savename '.mat']);
+    beh=behave([savename '.mat'],[savename '.csv']);
 
     behaveStats(beh);
 
