@@ -51,7 +51,12 @@ function setting=getSettings(varargin)
       s.host.isMEG=0;
       s.screen.res=[1024 768];   
      end
-     fprintf('screen res: %d %d %s\n',s.screen.res,s.host.name);
+     
+     fprintf('screen res: %d %d %s\n',s.screen.res,s.host.name);     
+     s.info.MLversion= version();
+     s.info.PTBversion = PsychtoolboxVersion();
+     fprintf('Versions: %s PTB %s\n',s.info.MLversion,s.info.PTBversion);
+
 
      
      %s.screen.res=[800 600];   % any computer, testing

@@ -2,15 +2,20 @@
 %
 % USAGE: nBMSI(subj,blocktype) 
 %   or   nBMSI subj blocktype
+% EXAMPLE:
 %
-% block type is 1 (nback) 2 (interf) 3 (cong) or 4 (mixed)
+%  nBMSI 12345 1
+%
+% block type is 1 (nback) 2 (interf) 3 (cong) or 4 and greater (mixed)
+% negative numbers are practice of the positive number
 %
 % output is saved in behave/subj_block_time.mat and behave/csv/subj_block_time
 function nBMSI(subj,blocktype,varargin)
  % block type should be a number
- if ischar(blocktype), blocktype=str2num(blocktype), end
-
-
+ if ischar(blocktype), blocktype=str2double(blocktype);  end
+ 
+ [savename,dstr] = formatSaveName(subj,blocktype);
+ diary([savename '_log.txt']);
  s = getSettings('init',varargin{:});
  
  %20150123 - WF+SM@MRRC 
@@ -21,7 +26,6 @@ function nBMSI(subj,blocktype,varargin)
  [e, emat] = genEventList(blocktype);
  if(~sOctave);cd ..;end
  
- [savename,dstr] = formatSaveName(subj,blocktype);
 
  if isfield(emat.inf,'congidx')
    fprintf('cong intference trials on:\n');

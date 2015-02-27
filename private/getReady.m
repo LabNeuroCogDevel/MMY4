@@ -20,7 +20,7 @@ function MRstart = getReady(w,varargin)
    end
 
 
-   DrawFormattedText(w,disptex,'center','center');
+   DrawFormattedText(w,disptext,'center','center');
    Screen('Flip', w);
 
    ready=0;
