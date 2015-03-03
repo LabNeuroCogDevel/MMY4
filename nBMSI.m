@@ -12,10 +12,14 @@
 % output is saved in behave/subj_block_time.mat and behave/csv/subj_block_time
 function nBMSI(subj,blocktype,varargin)
  % block type should be a number
+ % subject should be a string
  if ischar(blocktype), blocktype=str2double(blocktype);  end
+ if isfloat(subj), subj=num2str(subj);  end
  
  [savename,dstr] = formatSaveName(subj,blocktype);
  diary([savename '_log.txt']);
+ 
+ % get settings
  s = getSettings('init',varargin{:});
  
  %20150123 - WF+SM@MRRC 
@@ -79,6 +83,7 @@ function nBMSI(subj,blocktype,varargin)
     beh=behave([savename '.mat'],[savename '.csv']);
 
     behaveStats(beh);
+    copyFiles(subj,dstr(1:8),savename)
 
     % shut it all down
     closedown();
