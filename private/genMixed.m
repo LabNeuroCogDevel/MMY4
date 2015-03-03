@@ -21,15 +21,22 @@ function [ttvec, nbk,inf,cng] = genMixed(N,n_etype,n_blocks,nprobe,nback)
  n_mini  = t_trlblk/mu; %8 : number of miniblocks of each type 
 
  % generate miniblock trial counts
+ % v = 3x12 matrix (row for each block type, column for each block length)
  %   -- this is overkill, could just make one long vector
  %      but this way we could change the mu for each mini
  v=zeros(n_etype,n_mini);
  for i=1:n_etype;
-   if i==1;
-      minlen=nback+1;
-   else
-      minlen=1;
-   end
+   % WF20150303
+   % we want all types to have same distribution of mini block sizes
+   % so minlen will be constant across all types
+   minlen=3;
+   %if i==1;
+   %   minlen=nback+1;
+   %else
+   %   minlen=1;
+   %end
+   
+   % this is nothing but a shuffle now 20150303
    v(i,:) = mg_blockvec(mu,n_mini,minlen);
  end
 
@@ -129,3 +136,21 @@ end
 % 4. get the diff between them to find length
 %! miniBlockLens = diff(  find(  [Inf diff(nbi) Inf] > 1  ) );
 %! assert( all(miniBlockLens > nback) )
+
+%!test 'each type has the same distribution of miniblock lengths'
+%%% ugly run length encode
+%  find all indexes of a value
+%  find indexes where they start to change 
+%    and where they stop changing
+%  get the diff of those indexes as run length
+%  sort b/c we dont care about order
+%  make sure the mean is the same as the first row
+%  to ensure all values are the same
+%! for i=unique(ttvec)
+%!   idx=find(ttvec==i); 
+%!   change=[1 find(diff(idx)>1)+1]; 
+%!   s=idx(change); 
+%!   e=idx([find(diff(idx)>1) length(idx)]);
+%!   b(i,:)=sort((e-s)+1)
+%! end
+%! assert( all(  mean(b)==b(1,:)  ) )
