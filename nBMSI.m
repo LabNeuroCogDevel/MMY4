@@ -39,7 +39,7 @@ function nBMSI(subj,blocktype,varargin)
  %try
     w=setupScreen(s.screen.bg, s.screen.res);
 
-    instructions(w,blocktype);
+    instructions(w,blocktype,varargin{:});
 
 
     % we start when the scanner sends the go ahead

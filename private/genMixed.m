@@ -151,6 +151,6 @@ end
 %!   change=[1 find(diff(idx)>1)+1]; 
 %!   s=idx(change); 
 %!   e=idx([find(diff(idx)>1) length(idx)]);
-%!   b(i,:)=sort((e-s)+1)
+%!   b(i,:)=sort((e-s)+1);
 %! end
 %! assert( all(  mean(b)==b(1,:)  ) )
