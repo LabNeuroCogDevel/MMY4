@@ -109,9 +109,10 @@ function setting=getSettings(varargin)
 
     s.nbk.nbnum=2;          % n of the n-back
     s.nbk.nprobe=5;         % how many probes 
-    s.nbk.pureBlkNprobe=12; % how many probes for single block
-    s.nbk.minConsProbe=  2; % least amount of consecutive probes
-    s.nbk.maxConsProbe=  2; % most amount of consecutive probes
+    s.nbk.pureBlkNprobe= ceil(s.events.nPureBlk/4); % how many probes for single block, 25%
+    s.nbk.minConsProbe=  1; % least amount of consecutive probes
+    s.nbk.maxConsProbe=  1; % most amount of consecutive probes
+    % cons probe fixed at 2, changed to 1 (no repeats) 20150309
 
 
    nbidx = find(  cellfun(...
