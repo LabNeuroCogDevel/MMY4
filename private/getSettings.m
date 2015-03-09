@@ -13,7 +13,7 @@ function setting=getSettings(varargin)
 
      %% get host name and set info related to it
      %% we can also specify a host name as a (second) option
-     if length(varargin)<2
+     if length(varargin)<2 || strncmp(varargin{2},'example',7)
         [returned,host] = system('hostname');
         host=strtrim(host);
         host(host=='-')='_';
