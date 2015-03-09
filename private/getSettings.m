@@ -63,7 +63,8 @@ function setting=getSettings(varargin)
      %s.screen.res=[800 600];   % any computer, testing
      %s.screen.res=[1600 1200]; % will's computer
      %s.screen.res=[1280 1024]; %test computer in Loeff
-     s.screen.bg=[120 120 120];
+     %s.screen.bg=[120 120 120];
+     s.screen.bg=[170 170 170];
 
      KbName('UnifyKeyNames')
 
@@ -90,10 +91,12 @@ function setting=getSettings(varargin)
     % color for number sequences
     s.colors.seqtext       = [0   0   0  ];
     s.colors.iticross      = [255 255 255];
-    s.colors.Fix.Nback     = [0   0   155];
-    s.colors.Fix.Interfere = [155 0   0  ];
-    s.colors.Fix.Congruent = [0   155 0  ];
+    s.colors.Fix.Nback     = [42  155 220] %[0   0   155];
+    s.colors.Fix.Interfere = [245 93  133];%[155 0   0  ];
+    s.colors.Fix.Congruent = [23  168  87];%[0   155 0  ];
     s.colors.bg            = s.screen.bg;
+    % http://vis4.net/labs/colorvis/embed.html?m=hcl&gradients=12
+    % L=1.53
 
 
     % event settings

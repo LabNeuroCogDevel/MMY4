@@ -22,6 +22,7 @@ function MRstart = getReady(w,varargin)
 
    DrawFormattedText(w,disptext,'center','center');
    Screen('Flip', w);
+   WaitSecs(.5);
 
    ready=0;
 
