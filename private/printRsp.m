@@ -1,5 +1,6 @@
 % print response for pretty output
 %
+% printRsp('n_Back',t,seq,issamenback)
 % printRsp('Congru',t,seq,issamenback)
 % printRsp('Interf',t,seq,0)
 %
