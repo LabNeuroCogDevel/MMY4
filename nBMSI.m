@@ -73,7 +73,7 @@ function nBMSI(subj,blocktype,varargin)
     lastonset = lastonset.onset;
     endtime=lastonset+s.time.ITI.end;
 
-    save([savename '.mat'],'res','subj','blocktype', 'e', 'emat', 'savename','dstr','s', 'endtime','lastonset');
+    save([savename '.mat'],'res','subj','blocktype', 'e', 'emat', 'savename','dstr','s', 'endtime','lastonset','starttime','endtime');
 
     fprintf('xx END ITI @ %0.3f for %0.2f\n',lastonset-starttime, s.time.ITI.end);
     fprintf('xx GOOD JOB @ %0.3f\n',endtime-starttime);

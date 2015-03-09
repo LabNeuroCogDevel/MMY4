@@ -154,6 +154,14 @@ function setting=getSettings(varargin)
       s.time.ITI.end= 0;
    end
 
+
+
+   %% Triggers for MEG
+   % cue           x = 0 | 1 | 2  || 3 | 4 | 5  (x = block type, +3 if repeat)
+   % numbers/probe y = 10| 20| 30 + mod(x,3)    (y = correct key,+3 if probe)  10 11 12 (not probe) | 13 14 15 (probe)
+   % Resp          z = 100 + y|200 + y                  (z = correct|incorrect )
+   % ITI           255          (end of trial, thought to subj, end of trial is at resp-- help ID noresp)
+
   end
 
   %% return only what we ask for
