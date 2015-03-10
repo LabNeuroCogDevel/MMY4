@@ -1,19 +1,27 @@
 % n-Back Multi-Source Interference
 %
 % USAGE: nBMSI(subj,blocktype) 
-%   or   nBMSI subj blocktype
+%   or   nBMSI subj blocktype  
 % EXAMPLE:
 %
-%  nBMSI 12345 1
+%  nBMSI 12345 congr
+%  nBMSI 12345 congr example Admin_PC % force MR computer, show examples
 %
-% block type is 1 (nback) 2 (interf) 3 (cong) or 4 and greater (mixed)
-% negative numbers are practice of the positive number
+% block type can be given as a string or number
+%   1 - nback,nb, blue; 
+%   2 - interference, int, red;
+%   3 - congruent, cong, green;
+%   4 - mix (mix1,mix2,mix3,mix4);
+% negative numbers are practice of the positive number (imply 'example')
 %
 % output is saved in behave/subj_block_time.mat and behave/csv/subj_block_time
 function nBMSI(subj,blocktype,varargin)
+ origblockname=blocktype;
  % block type should be a number
+ blocktype = blockName2Num(blocktype);
+ %if ischar(blocktype), blocktype=str2double(blocktype);  end
+
  % subject should be a string
- if ischar(blocktype), blocktype=str2double(blocktype);  end
  if isfloat(subj), subj=num2str(subj);  end
  
  [savename,dstr] = formatSaveName(subj,blocktype);
@@ -73,7 +81,7 @@ function nBMSI(subj,blocktype,varargin)
     lastonset = lastonset.onset;
     endtime=lastonset+s.time.ITI.end;
 
-    save([savename '.mat'],'res','subj','blocktype', 'e', 'emat', 'savename','dstr','s', 'endtime','lastonset','starttime','endtime');
+    save([savename '.mat'],'res','subj','blocktype', 'e', 'emat', 'savename','dstr','s', 'endtime','lastonset','starttime','endtime','origblockname');
 
     fprintf('xx END ITI @ %0.3f for %0.2f\n',lastonset-starttime, s.time.ITI.end);
     fprintf('xx GOOD JOB @ %0.3f\n',endtime-starttime);

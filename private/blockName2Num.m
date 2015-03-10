@@ -7,7 +7,7 @@
 %   can come in as num or char
 function bn = blockName2Num(blockname)
 
-   if isnum(blockname)
+   if isfloat(blockname)
     nb=blockname;
    end
 
@@ -19,7 +19,7 @@ function bn = blockName2Num(blockname)
      case {'red','int','interference'}
        bn=2;
 
-     case {'green','cong','congruent'}
+     case {'green','cong','congruent','congr'}
        bn=3;
 
      case {'mix','mix1','mix2','mix3',...
@@ -31,7 +31,7 @@ function bn = blockName2Num(blockname)
 
    end
 
-   if(bn>9)
+   if(bn>9 || bn<-9)
      error('what blockname did you mean?');
    end
 

@@ -82,9 +82,9 @@ function setting=getSettings(varargin)
      s.keys.string = {'1','2','3'};
 
      s.keys.fingernames = {...
-                      'right index finger(j)',...
-                      'right middle finger(k)',...
-                      'right ring finger(l)', ...
+                      'right index finger',...
+                      'right middle finger',...
+                      'right ring finger', ...
                       };
 
 
@@ -94,9 +94,11 @@ function setting=getSettings(varargin)
     s.colors.Fix.Nback     = [42  155 220] %[0   0   155];
     s.colors.Fix.Interfere = [245 93  133];%[155 0   0  ];
     s.colors.Fix.Congruent = [23  168  87];%[0   155 0  ];
-    s.colors.bg            = s.screen.bg;
     % http://vis4.net/labs/colorvis/embed.html?m=hcl&gradients=12
     % L=1.53
+    s.colors.bg            = s.screen.bg;
+    % not actually a color, but is needed when color is needed
+    s.colors.seqtextsize   = 40;
 
 
     % event settings
