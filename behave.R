@@ -111,6 +111,7 @@ writeBigCSV <-function( pattern='behave/csv/*csv',outname="behave/all.csv"){
    #big$is_switch[ difftt & !diffblk ] <- 1
 
    write.table(big,file=outname,sep=",",row.names=F)
+   return(big)
 }
 
 
