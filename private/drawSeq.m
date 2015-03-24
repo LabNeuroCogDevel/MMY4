@@ -6,5 +6,6 @@ function t=drawSeq(w,when,seq,varargin)
   oldFontSize=Screen(w,'TextSize',colors.seqtextsize);
   DrawFormattedText(w,dispseq,'center','center',colors.seqtext);
   Screen(w,'TextSize',oldFontSize);
+  drawPhDioBox(w,colors.pd.seq);
   [v, t.onset ] = Screen('Flip',w,when,varargin{:});
 end

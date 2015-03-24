@@ -15,17 +15,8 @@ function t=event_Nback(w,when,maxwait,seq,issamenback)
   %keys.string = {'1','2','3'};
 
 
-
   crctKeyIdx=findFingerInSeq(seq,keys.string);
 
-  keyCode=zeros(256,1);
-
-
-
-  t.seqCrct   = -1;
-  t.seqKey    = Inf;
-  t.seqRT     = Inf;
-  t.pushed    = 0;
   t.crctKey   = crctKeyIdx;
   t.probe     = issamenback;
 
@@ -34,46 +25,24 @@ function t=event_Nback(w,when,maxwait,seq,issamenback)
   end
 
   t.seqDisp     = seq;
-
+  % what trigger code we send to the port @ the MEG
+  t.tcSeq = getTrigger(1,crctKeyIdx,issamenback);
+  
+  %% display sequence and send code
   %seqt = drawSeq(w,when,seq,1); %20141208WF, dont need to hold screen
   seqt = drawSeq(w,when,seq);
+  t.tcSeqOnset = sendCode(t.tcSeq);
+
   t.onset= seqt.onset;
 
+  % wait (maxwait seconds) for a valid (keys.finger) response
+  % report when the key was pushed, what the rt is (based on onset)
+  % what was pushed and if it is correct
+  [ t.seqKey,t.seqRT,t.pushed,t.seqCrct ] = ...
+      waitForResp(t.onset, when, maxwait,keys.finger,crctKeyIdx);
 
-  while GetSecs() - when <= maxwait && ...
-        ~isfinite(t.seqRT)
-        %~(isfinite(t.nbackRT) &&  isfinite(t.seqRT))% 20141208
-    [key, keytime, keyCode] = KbCheck;
-
-
-    escclose(keyCode);
-
-    if any(keyCode(keys.finger)) && ~isfinite(t.seqRT)
-      t.seqKey  = keytime;
-      t.seqRT   = keytime - t.onset;
-      t.pushed  = find(keyCode(keys.finger));
-
-      % pushed all the keys or the wrong key
-      if all(keyCode(keys.finger)) ||...
-         ~keyCode(keys.finger(crctKeyIdx))
-        t.seqCrct = 0;
-      else
-        t.seqCrct = 1;
-      end
-
-
-    else
-      continue
-    end
-
-  end
 
   printRsp('n_Back',t,seq,issamenback)
 
-
-
-
-  Screen('FillRect',w,colors.bg);  % clear the screen from sequence
-  drawCross(w,colors.iticross)
-  [v,t.clearonset] = Screen('Flip',w);
+  t.clearonset = clearAfterResp(w,colors);
 end

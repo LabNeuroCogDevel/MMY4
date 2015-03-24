@@ -11,6 +11,7 @@ function [e mat] = genEventList(blocktypes)
       nbnum=nbks.nbnum;
 
       types={'Nback','Interfere', 'Congruent'};
+      tt2num.Nback=1;tt2num.Interfere=2;tt2num.Congruent=3;
 
       % all blocks greater than 4 are of type 4 (mix)
       % negative block types are practice
@@ -108,26 +109,38 @@ function [e mat] = genEventList(blocktypes)
       for t=1:n
         si=3*t -2;
         tt = trlTypes{t};
+        ttn = tt2num.(tt);
+        
+        % for trigger codes, need to know 
+        % if this is a repeat or is first
+        isfirst= t==1 || e(si-1).ttn ~= ttn;
+        %1=nbk,2=int,3=cng (repeat)
+        %4     5     6     (first)
+        tcode=ttn+3*isfirst;
+
 
         %% ITI
         e(si).trl=t;
         e(si).tt=tt;
         e(si).name='Fix';
+        e(si).ttn=ttn;
         e(si).onset=cumtime;
         e(si).duration=ITIs(t); 
         e(si).func=@event_Fix;
-        e(si).params={colors.iticross,0};
+        e(si).params={colors.iticross,colors.pd.ITI,255};
         cumtime=cumtime+e(si).duration;
 
         si=si+1;
+
         %% Fix
+
         e(si).trl=t;
         e(si).tt=tt;
         e(si).name='Cue';
         e(si).onset=cumtime;
         e(si).duration=time.(tt).cue;
         e(si).func=@event_Fix;
-        e(si).params={colors.Fix.(tt)};
+        e(si).params={colors.Fix.(tt), colors.pd.cue, tcode};
         cumtime=cumtime+e(si).duration;
 
         %% Disp + Resp

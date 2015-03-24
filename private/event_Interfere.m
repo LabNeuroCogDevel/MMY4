@@ -1,3 +1,11 @@
+%
+% show a sequence of 3 numbers
+% and wait for 
+% 1) identify oddball key press
+%
+
+
+
 function t = event_Interfere(w,when,maxwait,seq)
   keys=getSettings('keys');
   colors=getSettings('colors');
@@ -10,45 +18,26 @@ function t = event_Interfere(w,when,maxwait,seq)
 
   crctKeyIdx=findOddball(seq,keys.string);
 
-  keyCode=zeros(256,1);
 
-  t.seqCrct   = -1;
-  t.seqKey    = Inf;
-  t.seqRT     = Inf;
-  t.pushed    = 0;
   t.crctKey   = crctKeyIdx;
 
+  t.tcSeq = getTrigger(1,crctKeyIdx,issamenback);
+
   seqt = drawSeq(w,when,seq);
+  t.tcSeqOnset = sendCode(t.code);
+
   t.onset= seqt.onset;
 
-  while GetSecs() - when <= maxwait && ~isfinite(t.seqRT)
-    [key, keytime, keyCode] = KbCheck;
-    escclose(keyCode);
-
-    if any(keyCode(keys.finger)) && ~isfinite(t.seqRT)
-
-      t.seqKey  = keytime;
-      t.seqRT   = keytime - t.onset;
-      t.pushed  = find(keyCode(keys.finger));
-
-      % pushed all the keys or the wrong key
-      if all(keyCode(keys.finger)) ||...
-         ~keyCode(keys.finger(crctKeyIdx))
-        t.seqCrct = 0;
-      else
-        t.seqCrct = 1;
-      end
-
-
-    end
-
-  end
+  % wait (maxwait seconds) for a valid (keys.finger) response
+  % report when the key was pushed, what the rt is (based on onset)
+  % what was pushed and if it is correct
+  [ t.seqKey,t.seqRT,t.pushed,t.seqCrct ] = ...
+      waitForResp(t.onset, when, maxwait,keys.finger,crctKeyIdx);
 
   printRsp('Interf',t,seq,0)
 
+  t.clearonset = clearAfterResp(w,colors);
 
-  drawCross(w,colors.iticross)
-  [v,t.clearonset] = Screen('Flip',w);
 end
 
 % OCTAVE TEST

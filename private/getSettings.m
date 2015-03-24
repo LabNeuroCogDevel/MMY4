@@ -101,6 +101,12 @@ function setting=getSettings(varargin)
     s.colors.seqtextsize   = 40;
 
 
+    %% photo diode intensities
+    s.colors.pd.cue = 0;
+    s.colors.pd.seq = 0.33;
+    s.colors.pd.RT  = 0.66;
+    s.colors.pd.ITI = 1;
+
     % event settings
     s.events.nTrl    = 60; % number trials
     s.events.nPureBlk= 35; % number of trials for not mix blocks
@@ -162,12 +168,7 @@ function setting=getSettings(varargin)
    end
 
 
-
-   %% Triggers for MEG
-   % cue           x = 0 | 1 | 2  || 3 | 4 | 5  (x = block type, +3 if repeat)
-   % numbers/probe y = 10| 20| 30 + mod(x,3)    (y = correct key,+3 if probe)  10 11 12 (not probe) | 13 14 15 (probe)
-   % Resp          z = 100 + y|200 + y                  (z = correct|incorrect )
-   % ITI           255          (end of trial, thought to subj, end of trial is at resp-- help ID noresp)
+   % MEG trigger codes: see getTrigger.m
 
   end
 
