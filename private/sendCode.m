@@ -21,9 +21,9 @@ function  tcOnset = sendCode(code)
    end
    
    % write the trigger code out
+   fprintf('\t%d trigger\n',code);
    putvalue(DIOHANDLE,code);
    tcOnset=getSecs();
-   fprintf('\t%d trigger \n',code);
    % reset code
    % putvalue(DIOHANDLE,0); 
    

@@ -21,10 +21,10 @@ function t = event_Interfere(w,when,maxwait,seq)
 
   t.crctKey   = crctKeyIdx;
 
-  t.tcSeq = getTrigger(1,crctKeyIdx,issamenback);
+  t.tcSeq = getTrigger(1,crctKeyIdx);
 
   seqt = drawSeq(w,when,seq);
-  t.tcSeqOnset = sendCode(t.code);
+  t.tcSeqOnset = sendCode(t.tcSeq);
 
   t.onset= seqt.onset;
 

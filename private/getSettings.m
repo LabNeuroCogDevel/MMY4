@@ -26,25 +26,29 @@ function setting=getSettings(varargin)
      % MR          => show getready screen
      % MEG         => send trigger codes and photodiode
      s.host.name = host;
-     if strncmp(host,'Admin_PC',8)
+     
+     if strncmp(host,'Admin_PC',8) % MRCTR
       s.host.type='MR';
       s.host.isMR=1;
       s.host.isBehave=0;
       s.host.isMEG=0;
-      s.screen.res=[1024 768];   % MRCTR
+      s.screen.res=[1024 768];   
       fprintf('running MR\n');
-     elseif strncmp(host,'MEGPC',5)
+      
+     elseif strncmp(host,'PUH1DMEG03',5) %MEG
       s.host.type='MEG';
       s.host.isMR=0;
       s.host.isBehave=1;
       s.host.isMEG=1;
-      s.screen.res=[1024 768]; 
-     elseif strncmp(host,'upmc_56ce704785',15)
+      s.screen.res=[1280 1024];
+      
+     elseif strncmp(host,'upmc_56ce704785',15) %Practice comp
       s.host.type='Behave';
       s.host.isMR=0;
       s.host.isBehave=1;
       s.host.isMEG=0;
       s.screen.res=[1440 900];
+      
      else
       s.host.type='Unknown';
       s.host.isMR=0;

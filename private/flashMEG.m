@@ -3,7 +3,7 @@
 %
 % copied from getReady
 function flashMEG(w,varargin)
- 
+   cd 'private'; % old matlab (2009a) needs to be in the private dir 
    % number of intensity (4 different intensities)
    pdioInt=.3;
    nmax=4;
@@ -15,6 +15,7 @@ function flashMEG(w,varargin)
    keyidx=1:256;
 
    lastFlip=fliptext(w);
+   firstFlip=lastFlip;
    WaitSecs(.3);
 
    % fprintf('waiting for scanner "=" keyboard event\n');
@@ -23,7 +24,8 @@ function flashMEG(w,varargin)
        timediff = GetSecs() - lastFlip;
        if( timediff > pdioInt )
            % cycle through 0 to 250 by 50
-           sendCode( ceil( mod(n*50,250) ) );
+           fprintf('%0.2f ',GetSecs() - firstFlip);
+           sendCode( ceil( mod(n*50,250) )+50 );
            %cycle through nmax intensities
            drawPhDioBox(w,mod(n,nmax)/nmax);
            lastFlip=fliptext(w);
@@ -38,6 +40,7 @@ function flashMEG(w,varargin)
 
   % read to start
   sendCode(0);
+  cd .. % old matlab go back out
 end
 function lastFlip = fliptext(w)
    DrawFormattedText(w,'Checking recording devices','center','center');

@@ -77,7 +77,7 @@ function nBMSI(subj,blocktype,varargin)
     
     % draw final fixation for s.endITI seconds
     % then say good job
-    lastonset = event_Fix(w,GetSecs(), s.colors.iticross);
+    lastonset = event_Fix(w,GetSecs(), s.colors.iticross,s.colors.pd.ITI,255);
     lastonset = lastonset.onset;
     endtime=lastonset+s.time.ITI.end;
 

@@ -113,17 +113,25 @@ function [e mat] = genEventList(blocktypes)
         
         % for trigger codes, need to know 
         % if this is a repeat or is first
-        isfirst= t==1 || e(si-1).ttn ~= ttn;
+        
+        isfirst=1;
+        if t~=1
+            isfirst = e(si-1).ttn ~= ttn;
+            if(isempty(isfirst))
+               error('no trigger code on t %d (%d)!',t,si)
+            end
+        end
         %1=nbk,2=int,3=cng (repeat)
         %4     5     6     (first)
         tcode=ttn+3*isfirst;
+        
 
 
         %% ITI
         e(si).trl=t;
         e(si).tt=tt;
-        e(si).name='Fix';
         e(si).ttn=ttn;
+        e(si).name='Fix';
         e(si).onset=cumtime;
         e(si).duration=ITIs(t); 
         e(si).func=@event_Fix;
@@ -133,9 +141,9 @@ function [e mat] = genEventList(blocktypes)
         si=si+1;
 
         %% Fix
-
         e(si).trl=t;
         e(si).tt=tt;
+        e(si).ttn=ttn;
         e(si).name='Cue';
         e(si).onset=cumtime;
         e(si).duration=time.(tt).cue;
@@ -147,6 +155,7 @@ function [e mat] = genEventList(blocktypes)
         si=si+1;
         e(si).trl=t;
         e(si).tt=tt;
+        e(si).ttn=ttn;
         e(si).name='Rsp';
         e(si).onset=cumtime;
         e(si).duration=time.(tt).wait;
