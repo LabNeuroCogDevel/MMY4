@@ -35,8 +35,15 @@ function [ seqKey,seqRT,pushed,seqCrct ] = waitForResp(onset, when,maxwait,finge
       end
 
       % send trigger code for meg
+      % we do not need or want to send a zero code
+      % after a fixed  deleay   (so 'dontsendzero')
+      % - it'd be bad because we could be responding within ms of ending
+      %   and the fixed wait would push us outside the intended timing
+      % - we can get away with it because the next code will be 255
+      %   w/o reseting to 0, the first sample might be above the value we want
+      %       but there isn't anything above 255 :) 
       tcRT      = getTrigger(2,(~seqCrct)+1);
-      tcRTOnset = sendCode( tcRT );
+      tcRTOnset = sendCode( tcRT, 'dontsendzero' );
 
     else
       continue

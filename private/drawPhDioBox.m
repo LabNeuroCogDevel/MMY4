@@ -1,5 +1,15 @@
 % draw a border for the photo diode
 function drawPhDioBox(w,intensity,varargin)
+ % get weither or not we should use MEG
+ persistent isMEG;
+ if isempty(isMEG)
+   h=getSettings('host');
+   isMEG=h.isMEG;
+ end
+
+ if ~isMEG
+  return
+ end
  
  screen=Screen('Rect',w);
  
