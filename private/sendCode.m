@@ -38,7 +38,7 @@ function  tcOnset = sendCode(code,varargin)
    % so in this case we wont 0. conviently the following code is 255 (immune to spikes)
    if isempty(varargin)
     WaitSecs(.1);
-    putvalue(DIOHANDLE,0);
+    putvalue(DIOHANDLE,0); 
    end
    
  else

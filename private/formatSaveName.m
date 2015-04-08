@@ -33,5 +33,9 @@ function [savename,dstr] = formatSaveName(varargin)
  d    = datevec(now);
  dstr = [ num2str(d(1)) sprintf('%02d',d(2:5)) ];
 
+ % add date to save path (WF2015047 @MEG)
+ outdir=[ outdir dstr(1:8) '/' ];
+ mkdir(outdir);
+ 
  savename=[outdir name '_' dstr ];
 end

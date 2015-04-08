@@ -1,10 +1,16 @@
 % copyFiles:
 %   copy any 'log.txt', '.csv', and '.mat' files of the
 %   "savename" given as input to the function
-function copyFiles(subj,dstr,savename, varargin)
- addpath('private/ssh')
+function copyFiles(subj,dstr,savename)
+ % setup ssh
+ addpath('private/ssh');
+ addpath('ssh');
+ sshhost='arnold.wpic.upmc.edu';
+ 
+ % setup smb
  copybase='B:/bea_res/Data/Tasks/Switch_MMY4/Behave';
 
+ host=getSettings('host');
  % we dont expect to find B if we are at MR or MEG
  if  exist(copybase,'dir')
   savedir=[copybase '/' subj];
@@ -22,9 +28,10 @@ function copyFiles(subj,dstr,savename, varargin)
   end
 
  % we have ssh
- elseif ~isempty(varargin)
-  spath=['/Volumes/GropeGate/Switch_MMY4/subj/' subj '/' dstr '/behave'];
-  conn = ssh2_config('arnold.wpic.upmc.edu','lncd','B@ngal0re');
+ elseif 0 && isfield(host,'isMEG') && host.isMEG
+  spath=['/Users/lncd/rcn/bea_res/Data/Tasks/Switch_MMY4/MEG/' subj '/' dstr ];
+  fprintf('transfering to %s:%s\n',sshhost,spath);
+  conn = ssh2_config(sshhost,'lncd','B@ngal0re');
   command_output = ssh2_command(conn,['mkdir -p ' spath] );
   for ft = {'_log.txt','.mat','.csv'}
     fname=[savename ft{1}];

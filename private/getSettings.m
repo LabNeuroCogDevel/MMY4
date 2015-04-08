@@ -73,7 +73,7 @@ function setting=getSettings(varargin)
      KbName('UnifyKeyNames')
 
      % use fingers:  index  middle ring
-     if s.host.isMR
+     if s.host.isMR || s.host.isMEG
        % Button Glove index: middle, ring
        s.keys.finger = KbName({'2@','3#','4$'}); 
      else
@@ -106,10 +106,10 @@ function setting=getSettings(varargin)
 
 
     %% photo diode intensities
-    s.colors.pd.cue = 0;
-    s.colors.pd.seq = 0.33;
+    s.colors.pd.cue = 1;
+    s.colors.pd.seq = 0;
     s.colors.pd.RT  = 0.66;
-    s.colors.pd.ITI = 1;
+    s.colors.pd.ITI = 0.33;
 
     % event settings
     s.events.nTrl    = 60; % number trials
