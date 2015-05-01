@@ -93,6 +93,11 @@ function nBMSI(subj,blocktype,varargin)
     beh=behave([savename '.mat'],[savename '.csv']);
 
     behaveStats(beh);
+
+    % check for bad timing
+    anyMissedOnsets(res);
+
+    % try to save some files
     copyFiles(subj,dstr(1:8),savename)
 
     % shut it all down

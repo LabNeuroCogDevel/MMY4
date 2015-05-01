@@ -32,12 +32,3 @@ cd MMY4
 ```bash
 rsync -nrhi /mnt/usb/MMY4/ ~/src/MMY4 --size-only
 ```
-
-## Check Presentation Timing
-
-```matlab
-a=load('/mnt/B/bea_res/Data/Tasks/Switch_MMY4/MEG/11362/20150420/11362_1_201504201712')
-od = cellfun(@(x) x.onset - x.idealonset , a.res);
-% mean for congr == .0087
-find( od > .1 )
-```
