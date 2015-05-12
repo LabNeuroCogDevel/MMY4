@@ -5,6 +5,8 @@
 % EXAMPLE:
 %
 %  nBMSI 12345 congr
+%  nBMSI 12345 nback example % run nback, show extended instructions
+%  nBMSI 12345 -1            % samea as above
 %  nBMSI 12345 congr example Admin_PC % force MR computer, show examples
 %
 % block type can be given as a string or number

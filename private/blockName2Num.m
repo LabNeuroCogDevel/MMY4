@@ -22,9 +22,12 @@ function bn = blockName2Num(blockname)
      case {'green','cong','congruent','congr'}
        bn=3;
 
-     case {'mix','mix1','mix2','mix3',...
+     case {'mix'}
+           bn=4;
+     
+     case {'mix1','mix2','mix3',...
                  'mix4','mix5','mix6'}
-       bn=4;
+       bn=str2double(blockname(4))+3;
        
      otherwise
        bn=str2double(blockname);
