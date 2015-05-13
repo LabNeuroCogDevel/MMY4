@@ -4,7 +4,7 @@
 %  if called with args, e.g. openPTBSnd('close')
 %   will close PTBsnd
 
-function pahandle=openPTBSnd(varargin)
+function openPTBSnd(varargin)
   persistent pahandle
 
   % if we haven't opened a handle and we aren't trying to close it
