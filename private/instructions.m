@@ -1,7 +1,7 @@
 %
 % go through the instructions
 %  instructions are longer if bn is negative
-%  or varargin contains 'example'
+%  or varargin contains 'practice'
 %
 % instructions are a cell of strings,function_handles, and image file paths
 % each cell element is a new slide
@@ -10,18 +10,12 @@ function instructions(w,bn,varargin)
 
     taskdir=pwd;
     
-    %% should we go threw the examples?
-    % yes if
-    %   it's pracitce (block less than 1)
-    %   or if we ask (with 'example')
-    % 
-    useexample=any(cellfun(@(x) ~isempty(strmatch(x,'example','exact')), varargin));
+    %% should we go through the practice slides?
+    practice=getSettings('pracsett');
 
-    % negative numbers imply example
-    if(bn<1)
-     useexample=1;
-    end
+    % make blocks 1-4 instead of -9 to +9
     bn=abs(bn);
+    if bn>4; bn=4; end
 
     % hard coded :(
     %keys=getSettings('keys');
@@ -43,7 +37,9 @@ function instructions(w,bn,varargin)
            'AND\n\n\n'...
            'you should also remember the number that was different!\n\n'...
            'Sometimes after a blue cross, "XXX" will appear instead of numbers.\n\n' ...
-           'When this happens, recall the number you remembered 2 times ago \n\n and press the button matching that number! \n\n ']...
+           'When this happens, recall the number you remembered 2 times ago \n\n'...
+           'and press the button matching that number! \n\n '],...
+           ['img/nback.png']...
      }, ...
      ... block num 2 = inf = red
      {   ['If the cross is RED,\n\n you will still push the button matching the different number. \n\n',...
@@ -54,25 +50,23 @@ function instructions(w,bn,varargin)
      {  ['If the cross is GREEN,\n\n push the button that matches the different number.'], ...
         ['img/congr.png'], ...
      } ...
+      ... block num 4 = mix = switch = blue/red/green 
+      'img/overview.png'
     };
 
-    if useexample
+    if practice.ispractice
        instruct = [...
          instruct ,{...
-         ... [ ...
-         ...   'Your index finger is number 1.\n\n'...
-         ...   'Your middle finger is number 2.\n\n'...
-         ...   'And your ring finger is number 3.'
-         ... ],...
          'img/fingers.png', ...
          'Before each set of numbers, there will be either a green, red, or blue cross.\n\n'...
          },...
          blockspecificinstruct{bn} ...
       ];
+    else
+      % add the overview screen
+      instruct = [ instruct, {'img/overview.png'} ];
     end 
 
-    % add the overview screen
-    instruct = [ instruct, {'img/overview.png'} ];
 
 
  %%% actual function

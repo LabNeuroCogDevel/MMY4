@@ -5,16 +5,18 @@
 % EXAMPLE:
 %
 %  nBMSI 12345 congr
-%  nBMSI 12345 nback example % run nback, show extended instructions
-%  nBMSI 12345 -1            % samea as above
-%  nBMSI 12345 congr example Admin_PC % force MR computer, show examples
+%  nBMSI 12345 nback practice % run nback, show extended instructions
+%  nBMSI 12345 -1             % same as above
+%  nBMSI 12345 congr practice Admin_PC % force MR computer, show more instructions 
 %
 % block type can be given as a string or number
 %   1 - nback,nb, blue; 
 %   2 - interference, int, red;
 %   3 - congruent, cong, green;
 %   4 - mix (mix1,mix2,mix3,mix4);
-% negative numbers are practice of the positive number (imply 'example')
+% negative numbers are practice of the positive number (imply 'practice')
+%  - practice has sounds
+%  - will stop early if accuracy is good
 %
 % output is saved in behave/subj_block_time.mat and behave/csv/subj_block_time
 function nBMSI(subj,blocktype,varargin)
@@ -29,6 +31,8 @@ function nBMSI(subj,blocktype,varargin)
  [savename,dstr] = formatSaveName(subj,blocktype);
  diary([savename '_log.txt']);
  
+ % make sure we set practice when we give a negative block number
+ if blocktype < 1; varargin = {varargin{:}, 'practice'}; end
  % get settings
  s = getSettings('init',varargin{:});
  
@@ -75,8 +79,12 @@ function nBMSI(subj,blocktype,varargin)
       res{ei}.name=ename;
       res{ei}.idealonset=onset;
 
-
       save([savename '.mat'],'res','subj','blocktype', 'e', 'emat', 'savename','dstr','s');
+
+      % play noise and check progress for practices
+      if s.pracsett.ispractice && isfield(res{ei},'seqCrct')
+        playSound(1,res{ei}.seqCrct);
+      end
 
     end
     

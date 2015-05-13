@@ -1,20 +1,37 @@
 % hard coded settings like color screen size, response keys
+% * we use the first intput argument as 'init'
+%   to say we want to change or re-initialize the settings
+% * we can use 'pratice' to set the practice flag
+%
 function setting=getSettings(varargin)
   persistent s;
 
-  % we use the first intput argument as 'init'
-  % to say we want to change or re-initialize the settings
-  isinit=( ~isempty(varargin) && strncmp(varargin{1},'init',4) );
+  % initialze flags we can get
+  opts=struct('init',0,'practice',0);
+
+  % find those flags in the input argument list
+  for of=fieldnames(opts)'
+   % finish if no args on input
+   if isempty(varargin); break; end
+   % fieldnames doesn't return exactly what we want
+   of=of{1};
+   % where is this option in the input arguments
+   idxs= cellfun(@(x) ischar(x)&&~isempty(strmatch(x,of,'exact')), varargin);
+   % if option exists, set it as true in option list
+   opts.(of) = any(idxs);
+   % clear varargin of the option
+   varargin(idxs) = [];
+  end
+
   
   % if we haven't defined s
   % or if we say 'init'
   % (re)define s
-  if isempty(s) || isinit
+  if isempty(s) || opts.init
 
      %% get host name and set info related to it
-     %% we can also specify a host name as a (second) option
-     %% but it shouldn't be host 'example' -- thats to give examples
-     if length(varargin)<2 || strncmp(varargin{2},'example',7)
+     %% we can also specify a host name as an option
+     if isempty(varargin)
         [returned,host] = system('hostname');
         host=strtrim(host);
         host(host=='-')='_';
@@ -130,12 +147,16 @@ function setting=getSettings(varargin)
     % cons probe fixed at 2, changed to 1 (no repeats) 20150309
 
 
-   nbidx = find(  cellfun(...
+    %% explictly set number of nback
+    %  with input arguments
+    nbidx = find(  cellfun(...
                @(x) ischar(x)&&strcmpi(x,'nbnum'), varargin ...
          ))+1;
-    if isinit && ~isempty(nbidx)
+
+    if opts.init && ~isempty(nbidx)
       s.nbk.nbnum=varargin{nbidx};
     end
+
 
     s.time.Nback.wait=1.5;
     s.time.Nback.cue=.5;
@@ -172,6 +193,21 @@ function setting=getSettings(varargin)
    end
 
 
+   %% practice options, cannot be called practice b/c
+   %   if we call getSettings('practice') it will be stripped out
+   s.pracsett.ispractice = opts.practice;
+   % how many in a row need to be correct
+   s.pracsett.nbk  = 3;
+   s.pracsett.intf = 3;
+   s.pracsett.cong = 3;
+   s.pracsett.mix  = 5;
+
+   % if we are practicing, we want to open the sound handle
+   % before we get into the task and cause huge delays
+   if opts.practice
+     openPTBSnd();
+   end
+
    % MEG trigger codes: see getTrigger.m
 
   end
@@ -179,7 +215,7 @@ function setting=getSettings(varargin)
   %% return only what we ask for
   %  or return all settings if nothing specified
   %  also return everything if we specified 'init'
-  if length(varargin)==1 && ~ isinit
+  if length(varargin)==1 && ~ opts.init
     setting=s.(varargin{1});
   else
     setting=s;

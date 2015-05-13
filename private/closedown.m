@@ -1,5 +1,7 @@
 %% clean up
 function closedown()
+    % close any open audio
+    openPTBSnd('close');
       
     %fprintf('getting ListenChar back\n');
     ListenChar(0);
