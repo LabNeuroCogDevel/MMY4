@@ -41,6 +41,7 @@ function beh=behave(f,varargin)
  %   - is trl XXX
  %   - what index was the correct key
  
+ r=truncateres(r);
  % use event list to find when we had a response event
  rsp = cellfun(@(x) ~isempty(strmatch(x,'Rsp','exact')), {r.e.name});
  

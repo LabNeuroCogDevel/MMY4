@@ -31,12 +31,12 @@ function setting=getSettings(varargin)
 
      %% get host name and set info related to it
      %% we can also specify a host name as an option
-     if isempty(varargin)
+     if isempty(varargin) 
         [returned,host] = system('hostname');
         host=strtrim(host);
         host(host=='-')='_';
      else 
-        host = varargin{2};
+        host = varargin{1};
      end 
 
      % behave true => fixed .5sec ITI
@@ -201,6 +201,8 @@ function setting=getSettings(varargin)
    s.pracsett.intf = 3;
    s.pracsett.cong = 3;
    s.pracsett.mix  = 5;
+   % what is the percent correct needed to end the trial early
+   s.pracsett.mincorper = .9;
 
    % if we are practicing, we want to open the sound handle
    % before we get into the task and cause huge delays

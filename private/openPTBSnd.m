@@ -7,7 +7,9 @@
 function pahandle=openPTBSnd(varargin)
   persistent pahandle
 
-  if isempty(pahandle)
+  % if we haven't opened a handle and we aren't trying to close it
+  % open it up
+  if isempty(pahandle) && isempty(varargin)
      nrchannels=1;
      InitializePsychSound;
      
@@ -19,6 +21,8 @@ function pahandle=openPTBSnd(varargin)
  end
  
 
+ % if we have an open handle
+ % and we have arguments -- we want to close the handle
  if ~isempty(varargin) && ~isempty(pahandle)
   % Stop playback:
   PsychPortAudio('Stop', pahandle);

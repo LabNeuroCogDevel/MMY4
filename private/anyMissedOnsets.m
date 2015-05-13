@@ -1,6 +1,7 @@
 %% check timing of onsets against ideal time
 % report anything bad
 function anyMissedOnsets(res)
+   res=truncateres(res);
    od = cellfun(@(x) abs(x.onset - x.idealonset), res);
    % mean for congr == .0087
    bidx =  od > .1;

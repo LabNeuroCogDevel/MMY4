@@ -81,9 +81,16 @@ function nBMSI(subj,blocktype,varargin)
 
       save([savename '.mat'],'res','subj','blocktype', 'e', 'emat', 'savename','dstr','s');
 
-      % play noise and check progress for practices
+      %% special logic for responsies during practice
       if s.pracsett.ispractice && isfield(res{ei},'seqCrct')
+        % play noise if we're wrong/too slow
         playSound(1,res{ei}.seqCrct);
+        
+        % end practice early if they're doing well
+        if practiceEndEarly(res(1:ei),abs(blocktype))
+         break
+        end
+
       end
 
     end
