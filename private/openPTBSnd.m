@@ -4,7 +4,7 @@
 %  if called with args, e.g. openPTBSnd('close')
 %   will close PTBsnd
 
-function openPTBSnd(varargin)
+function pa=openPTBSnd(varargin)
   persistent pahandle
 
   % if we haven't opened a handle and we aren't trying to close it
@@ -30,5 +30,5 @@ function openPTBSnd(varargin)
   PsychPortAudio('Close', pahandle);
   pahandle=[];
  end
-
+ pa=pahandle;
 end
