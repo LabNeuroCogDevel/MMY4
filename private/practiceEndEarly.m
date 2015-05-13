@@ -1,4 +1,4 @@
-% "train subjects to 90% accuracy" (getSettings.m: mincorper )
+% subjects must get n correct in a row
 % given results so far and the block type (1=nb,2=intf,3=cong)
 % should we end early
 function endnow = practiceEndEarly(res,blocktype)
@@ -36,15 +36,27 @@ function endnow = practiceEndEarly(res,blocktype)
  end
 
  %histc(resp,-1:1)
- 
- % we can be done
- % if we've seen mintrials
- % and we are pretty good at the task
  nt=length(resp);
- nc= nnz(resp==1);
- if( nt   >= mintrial && ...
-    nc/nt >= p.mincorper )
-   endnow=1;
+
+ % finish if last mintrial were good
+ starti=max( 1, nt-mintrial+1 );
+ endi  =max( nt, starti-mintrial );
+ lastn=resp(starti:endi);
+ lln=length(lastn);
+
+ if lln >= mintrial &&  all( lastn == 1 )
+    endnow=1
  end
+ 
+ % 20150513 -- accuracy is hard to come back to
+ %  just use window
+ %
+ % % if we've seen mintrials
+ % % and we are pretty good at the task
+ % nc= nnz(resp==1);
+ % if( nt   >= mintrial && ...
+ %    nc/nt >= p.mincorper )
+ %   endnow=1;
+ % end
 
 end

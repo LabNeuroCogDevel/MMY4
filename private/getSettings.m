@@ -202,7 +202,7 @@ function setting=getSettings(varargin)
    s.pracsett.cong = 3;
    s.pracsett.mix  = 5;
    % what is the percent correct needed to end the trial early
-   s.pracsett.mincorper = .9;
+   % s.pracsett.mincorper = .9; %20150513 -- just use the windows above
 
    % if we are practicing, we want to open the sound handle
    % before we get into the task and cause huge delays
