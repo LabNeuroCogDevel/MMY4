@@ -5,7 +5,7 @@ function  tcOnset = sendCode(code,varargin)
  tcOnset=0;
  
  persistent isMEG;
- persistent DIOHANDLE;
+ persistent address;
  
  % get weither or not we are sending trigger codes
  if isempty(isMEG)
@@ -15,14 +15,19 @@ function  tcOnset = sendCode(code,varargin)
 
  if(isMEG) 
    % make sure we have a diohandle to write to
-   if(isempty(DIOHANDLE))
-       DIOHANDLE=digitalio('parallel','lpt1');
-       addline(DIOHANDLE,0:7,0,'out');
+   if(isempty(address))
+       %DIOHANDLE=digitalio('parallel','lpt1');
+       %addline(DIOHANDLE,0:7,0,'out');
+       address=888;
+       addpath('C:\toolboxes\io64');
+       config_io;
+       outp(address,0);
    end
    
    % write the trigger code out
    fprintf('\t%d trigger\n',code);
-   putvalue(DIOHANDLE,code);
+   %putvalue(DIOHANDLE,code);
+   outp(address,code);
    tcOnset=getSecs();
 
    % wait 100ms and send 0 to clear the triggers 
@@ -38,7 +43,8 @@ function  tcOnset = sendCode(code,varargin)
    % so in this case we wont 0. conviently the following code is 255 (immune to spikes)
    if isempty(varargin)
     WaitSecs(.1);
-    putvalue(DIOHANDLE,0); 
+    %putvalue(DIOHANDLE,0); 
+    outp(address,0);
    end
    
  else
