@@ -21,6 +21,7 @@ end
 
 %!test
 % tt=mg_trialTypeVec([1 1 1; 2 2 2; 3 3 3])
+% assert(1==2)
 % %assert ( all( tt == [1   2   2   3   3   3   1   2   2   3   3   3   1   2   2   3   3   3]))
 % assert( length(tt)==(3+2+1)*3 )
 % assert( nnz(tt==3)==9 )

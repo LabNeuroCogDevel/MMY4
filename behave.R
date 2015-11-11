@@ -96,7 +96,9 @@ writeBigPdf <-function(pattern='behave/csv/*csv',outname="behave/behave.pdf"){
 }
 
 # reads in all the csv files and matching pattern and writes them to outname
-writeBigCSV <-function( pattern='behave/csv/*csv',outname="behave/all.csv"){
+#writeBigCSV <-function( pattern='behave/csv/*csv',outname="behave/all.csv"){
+# /mnt/B/bea_res/Data/Tasks/Switch_MMY4/Behave/11346/20150805/
+writeBigCSV <-function( pattern='/mnt/B/bea_res/Data/Tasks/Switch_MMY4/Behave/*/*/1*_[^-]*_[0-9]*.csv',outname="behave/all_beares_behave.csv"){
    allcsvfiles <- Sys.glob(pattern);
    cat("num ", pattern ," to read: ", length(allcsvfiles), "\n")
    big <- adply(allcsvfiles,1,readBehave )
