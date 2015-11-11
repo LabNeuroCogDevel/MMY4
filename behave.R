@@ -1,6 +1,11 @@
+# USAGE:
 # source('behave.R')
+# # read in all csvs in bea_res MMY4_Switch behave
 # writeBigCSV(outname="behave/all-behavepilot.csv")
+# # run some stats, make a pretty plot
 # l<-genStats("behave/all-behavepilot.csv")
+# # save the plot
+# ggsave(l$plot,'behave/plot.png')
 #
 library(ggplot2)
 library(plyr)
