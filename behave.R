@@ -150,3 +150,73 @@ genStats <- function(csvf="behave/all.csv") {
   return(list(plot=p,s=s,s.switch=s.switch))
 }
 
+
+
+countseq0 <- function(is.switch){
+ count<-0; 
+ unlist( lapply(is.switch,FUN=function(i){if(i==0){ count<<-count+1 }else{count<<-0} }) )
+}
+
+ # add pure/switch label, count trials since switch
+RTbyblock <- function(d) {
+ d$blocktype <- ifelse(d$block<4,'pure','switch') 
+ d %>% group_by(subj,block) %>% mutate(sinceswitch=countseq0(is_switch))
+}
+
+plotRTbyblock <-function(d) {
+  
+  # get switch block labels, since switch counts
+  # and remove incorrect and probe trials
+  d<-RTbyblock(d)  %>%
+     dplyr::filter(seqCrct==1,is_probe != 1 || is.na(is_probe) )
+
+  # get mean rt for each trial.type in pure
+  d.pure <- d %>% 
+     dplyr::filter(blocktype=='pure') %>%
+     #group_by(subj,trial.type) %>% 
+     #summarise(RT=mean(seqRT) ) %>%
+     #group_by(trial.type) %>% 
+     #summarise(RT.sd=sd(RT),RT.m=mean(RT))
+     group_by(trial.type) %>% 
+     summarise(RT.sd=sd(seqRT),RT.m=mean(seqRT))
+
+  # get mean rt for each n-since switch in each trial.type during switch
+  d.switch <- d %>% 
+     dplyr::filter(sinceswitch<=6,blocktype=='switch') %>%
+     group_by(subj,sinceswitch,trial.type) %>% 
+     summarise(RT=mean(seqRT) )
+
+  p<-ggplot( d.switch ) +
+    aes(x=as.factor(sinceswitch),y=RT) +   #,color=blocktype)+
+    geom_boxplot(position='dodge',alpha=.5) +
+    geom_smooth(aes(x=sinceswitch))+       #,method='lm') +
+    geom_rect(data=d.pure,aes(ymin=RT.m-RT.sd, ymax=RT.m+RT.sd,xmin=-Inf,xmax=+Inf,x=NULL,y=NULL),alpha=.2) +
+    geom_hline(data=d.pure,aes(yintercept=RT.m),linetype='dotted',color='red')+ 
+    facet_wrap(~trial.type) + theme_bw()
+  browser()
+  p
+}
+
+# merge data with dob, missing 8 subjects
+getDBinfo <- function(d) {
+  lunaids <- unique(d$subj)
+  con <- DBI::dbConnect(RPostgreSQL::PostgreSQL(),host='localhost', 'lncddb',user='postgres',password='')
+  query <- paste0("select id,sex,dob from person p join enroll e on e.pid=p.pid and etype like 'LunaID' where id in (",
+                  paste(sprintf("'%d'",lunaids),sep=",",collapse=","), ')')
+  dt<-dbGetQuery(con,query)
+  merge(dt,d,by.x='id',by.y='subj',all=T)
+}
+
+dosomestats <- function(d) {
+
+  d.switch$inv <- 1/(1+d.switch$sinceswitch)
+  m1<-lmer( seqRT_log~trial_type*sinceswitch+(1|subj) , data= d.switch )
+  m2<-lmer( seqRT_log~trial_type*inv+(1|subj) , data= d.switch )
+  car::Anova(m1)
+  est2<-lstrends(m2,~trial_type,var="inv")
+  pairs(est2,joint=TRUE,adjust="mvt")
+  AIC(m2)
+
+
+
+}
