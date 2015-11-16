@@ -15,7 +15,13 @@ readBehave <- function(csvfile) {
    # ... should be the csv file dumped out after a successful run
 
    # seqCrct,seqRT,pushed,crctKey,tt,is_switch,is_probe,sequence
-   bhd<-read.table(csvfile,header=T,sep=",")
+   tryCatch({
+    bhd<-read.table(csvfile,header=T,sep=",")
+   },error=function(e){
+    cat(csvfile,'is probably corrupt!',e$message,'\n')
+    return(NULL)
+   })
+
 
    # add subj block and start time to dataframe
    splits <- strsplit(gsub('.csv','',basename(csvfile)), '_' )
@@ -23,6 +29,8 @@ readBehave <- function(csvfile) {
    bhd$block <- sapply(splits,'[',2)
    bhd$sttime <- sapply(splits,'[',3)
 
+   # Behave, MR, or MEG?
+   bhd$visittype <- gsub('/','',regmatches(csvfile,regexpr('/(Behave|MEG|MR)/',csvfile)))
 
    # want to use ggplot colors, want inft as red, cngr as green, nbk as blue
    bhd$trial.type   <- factor( bhd$tt, levels=c("2","3","1"), labels=c("intf","cngr","nbk"))
@@ -103,7 +111,7 @@ writeBigPdf <-function(pattern='behave/csv/*csv',outname="behave/behave.pdf"){
 # reads in all the csv files and matching pattern and writes them to outname
 #writeBigCSV <-function( pattern='behave/csv/*csv',outname="behave/all.csv"){
 # /mnt/B/bea_res/Data/Tasks/Switch_MMY4/Behave/11346/20150805/
-writeBigCSV <-function( pattern='/mnt/B/bea_res/Data/Tasks/Switch_MMY4/Behave/*/*/1*_[^-]*_[0-9]*.csv',outname="behave/all_beares_behave.csv"){
+writeBigCSV <-function( pattern='/mnt/B/bea_res/Data/Tasks/Switch_MMY4/*/*/*/1*_[^-]*_[0-9]*.csv',outname="behave/all_beares.csv"){
    allcsvfiles <- Sys.glob(pattern);
    cat("num ", pattern ," to read: ", length(allcsvfiles), "\n")
    big <- adply(allcsvfiles,1,readBehave )
@@ -118,6 +126,7 @@ writeBigCSV <-function( pattern='/mnt/B/bea_res/Data/Tasks/Switch_MMY4/Behave/*/
    #big$is_switch[ difftt & !diffblk ] <- 1
 
    write.table(big,file=outname,sep=",",row.names=F)
+   big <- getDBinfo(big)
    return(big)
 }
 
@@ -201,9 +210,14 @@ plotRTbyblock <-function(d) {
 getDBinfo <- function(d) {
   lunaids <- unique(d$subj)
   con <- DBI::dbConnect(RPostgreSQL::PostgreSQL(),host='localhost', 'lncddb',user='postgres',password='')
-  query <- paste0("select id,sex,dob from person p join enroll e on e.pid=p.pid and etype like 'LunaID' where id in (",
-                  paste(sprintf("'%d'",lunaids),sep=",",collapse=","), ')')
-  dt<-dbGetQuery(con,query)
+  query <- sprintf("
+   select id,sex,dob 
+   from person p 
+   join enroll e on e.pid=p.pid and etype like 'LunaID' 
+   where id in (%s)",
+   paste(sprintf("'%s'",lunaids),sep=",",collapse=","))
+
+  dt<-DBI::dbGetQuery(con,query)
   merge(dt,d,by.x='id',by.y='subj',all=T)
 }
 
