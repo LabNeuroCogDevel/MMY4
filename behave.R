@@ -124,7 +124,7 @@ writeBigCSV <-function( pattern='/mnt/B/bea_res/Data/Tasks/Switch_MMY4/*/*/*/1*_
    #diffblk<- c(0,diff(as.numeric(big$sttime)) ) !=0 
    #big$is_switch <- 0
    #big$is_switch[ difftt & !diffblk ] <- 1
-
+   browser()
    write.table(big,file=outname,sep=",",row.names=F)
    big <- getDBinfo(big)
    return(big)
@@ -218,7 +218,8 @@ getDBinfo <- function(d) {
    paste(sprintf("'%s'",lunaids),sep=",",collapse=","))
 
   dt<-DBI::dbGetQuery(con,query)
-  merge(dt,d,by.x='id',by.y='subj',all=T)
+  withDB<-merge(dt,d,by.x='id',by.y='subj',all=T)
+  return(withDB)
 }
 
 dosomestats <- function(d) {
