@@ -218,7 +218,8 @@ getDBinfo <- function(d) {
    paste(sprintf("'%s'",lunaids),sep=",",collapse=","))
 
   dt<-DBI::dbGetQuery(con,query)
-  withDB<-merge(dt,d,by.x='id',by.y='subj',all=T)
+  withDB<-merge(dt,d,by.x='id',by.y='subj',all.y=T)
+  
   return(withDB)
 }
 
