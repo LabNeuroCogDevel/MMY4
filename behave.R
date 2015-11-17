@@ -124,9 +124,9 @@ writeBigCSV <-function( pattern='/mnt/B/bea_res/Data/Tasks/Switch_MMY4/*/*/*/1*_
    #diffblk<- c(0,diff(as.numeric(big$sttime)) ) !=0 
    #big$is_switch <- 0
    #big$is_switch[ difftt & !diffblk ] <- 1
-   browser()
-   write.table(big,file=outname,sep=",",row.names=F)
    big <- getDBinfo(big)
+   big$age <- as.numeric( difftime( lubridate::ymd( substr(big$sttime,0,8) ) ,as.Date(big$dob) ) )/365.25
+   write.table(big,file=outname,sep=",",row.names=F)
    return(big)
 }
 
@@ -219,7 +219,8 @@ getDBinfo <- function(d) {
 
   dt<-DBI::dbGetQuery(con,query)
   withDB<-merge(dt,d,by.x='id',by.y='subj',all.y=T)
-  
+  :q
+
   return(withDB)
 }
 
