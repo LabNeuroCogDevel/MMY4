@@ -219,7 +219,6 @@ getDBinfo <- function(d) {
 
   dt<-DBI::dbGetQuery(con,query)
   withDB<-merge(dt,d,by.x='id',by.y='subj',all.y=T)
-  :q
 
   return(withDB)
 }
