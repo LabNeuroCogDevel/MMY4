@@ -112,5 +112,23 @@ mat_info <- function(f) {
   
 }
 mats <- Sys.glob('/Volumes/L/bea_res/Data/Tasks/Switch_MMY4/MR/1*/20*/*mat')
-d_info <- lapply(mats,mat_info) |> dplry::bind_rows()
+d_info <- lapply(mats,\(x) tryCatch(mat_info(x),error=\(e) NULL)) |> bind_rows()
+d_info |>
+  separate(id,c('id','block')) |>
+  mutate(block_trials=paste0(block,"_",ntrial)) |>
+  group_by(block_trials) |>
+  summarise(n(), mean(dur),sd(dur))
 ```
+
+|block|trials | n() | mean(dur) | sd(dur)|
+|-|----------|------|-----------|--------|
+|1|35        |   80 |      2.39 | 0.0111 |
+|2|35        |   76 |      2.28 | 0.00986|
+|3|35        |   76 |      2.09 | 0.0249 |
+|4|60        |   76 |      3.72 | 0.00926|
+|5|60        |   76 |      3.73 | 0.0149 |
+|6|60        |   76 |      3.73 | 0.0146 |
+|7|60        |   76 |      3.73 | 0.0184 |
+|8|60        |   76 |      3.73 | 0.0163 |
+|9|60        |   76 |      3.73 | 0.0120 |
+
