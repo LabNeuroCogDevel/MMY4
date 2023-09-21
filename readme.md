@@ -1,5 +1,7 @@
 # n-Back Modified Multi-Source Interference Task
-task switching between interference/incongruent oddball selection and n-back congruent oddball selection/recall
+Task switching between interference/incongruent oddball selection and n-back congruent oddball selection/recall
+
+![task instructions](img/instructions.svg)
 
 ## run
 in `octave` or `matlab` with [`PTB`](http://psychtoolbox.org/download/)
@@ -31,4 +33,84 @@ cd MMY4
 ## transfer/copying
 ```bash
 rsync -nrhi /mnt/usb/MMY4/ ~/src/MMY4 --size-only
+```
+
+## MR
+
+### blocks
+```
+ ls /Volumes/L/bea_res/Data/Tasks/Switch_MMY4/MR/1*/20*/*mat|perl -lne 'print $& if m/_-?\d_/'|sort |uniq -c
+     42 _-1_
+     76 _1_
+     43 _-2_
+     76 _2_
+     43 _-3_
+     76 _3_
+     76 _4_
+     76 _5_
+     76 _6_
+     76 _7_
+     76 _8_
+     76 _9_
+```
+
+negative block numbers are "practice"
+
+from `nBMSI.m`:
+```
+%  nBMSI 12345 congr
+%  nBMSI 12345 nback practice % run nback, show extended instructions
+%  nBMSI 12345 -1             % same as above
+%  nBMSI 12345 congr practice Admin_PC % force MR computer, show more instructions 
+%
+% block type can be given as a string or number
+%   1 - nback,nb, blue; 
+%   2 - interference, int, red;
+%   3 - congruent, cong, green;
+%   4 - mix (mix1,mix2,mix3,mix4);
+% negative numbers are practice of the positive number (imply 'practice')
+%  - practice has sounds
+%  - will stop early if accuracy is good
+```
+
+from `private/blockName2Num.m`
+```
+     case {'mix1','mix2','mix3',...
+                 'mix4','mix5','mix6'}
+       bn=str2double(blockname(4))+3;
+```
+
+
+
+
+### Timing
+from `private/getSettings.m`
+```
+
+s.events.nTrl    = 60; % number trials
+
+    s.time.Nback.wait=1.5;     s.time.Nback.cue=.5;
+s.time.Interfere.wait=1.3; s.time.Interfere.cue=.5;
+s.time.Congruent.wait=1;   s.time.Congruent.cue=.5;
+
+s.time.ITI.max=Inf; s.time.ITI.min=1; s.time.ITI.end=12;
+
+% fixation time should be about equal to task time
+s.time.ITI.mu = mean([s.time.Nback.wait;
+                     s.time.Interfere.wait;
+                     s.time.Congruent.wait]) ...
+                 + s.time.Nback.cue;
+```
+
+from output mat files:
+```
+mat_info <- function(f) {
+  x <- R.matlab::readMat(f)
+  data.frame(dur=(x$endtime - x$res[[1]][[1]][,,1]$idealonset)/60,
+             ntrial=x$res[[length(x$res)]][[1]][,,1]$trl,
+             id=stringr::str_extract(f, '\\d{5}_-?\\d'))
+  
+}
+mats <- Sys.glob('/Volumes/L/bea_res/Data/Tasks/Switch_MMY4/MR/1*/20*/*mat')
+d_info <- lapply(mats,mat_info) |> dplry::bind_rows()
 ```
