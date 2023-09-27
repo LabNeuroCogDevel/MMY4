@@ -23,7 +23,7 @@ function [ev switchcnt ] =mg_eventswitch(n_evt,n_mini)
   % initialize vars
   switchcnt=zeros(n_evt);
   ev=zeros(n_mini,1);
-  ev(1)=RandSample(1:n_evt,[1 1]);
+  ev(1)=PsychRandSample(1:n_evt,[1 1]);
 
   evlist=1:n_evt;
 
@@ -40,7 +40,7 @@ function [ev switchcnt ] =mg_eventswitch(n_evt,n_mini)
        error('cannot compute, took a dead end path!')
       end
 
-      ev(i) = RandSample(avail,[1 1]);
+      ev(i) = PsychRandSample(avail,[1 1]);
 
       scnttemp = switchcnt;
       scnttemp(ev(i-1),ev(i) )=scnttemp(ev(i-1),ev(i) ) +1;
