@@ -1,25 +1,33 @@
-% n-Back Multi-Source Interference
-%
-% USAGE: nBMSI(subj,blocktype) 
-%   or   nBMSI subj blocktype  
-% EXAMPLE:
-%
-%  nBMSI 12345 congr
-%  nBMSI 12345 nback practice % run nback, show extended instructions
-%  nBMSI 12345 -1             % same as above
-%  nBMSI 12345 congr practice Admin_PC % force MR computer, show more instructions 
-%
-% block type can be given as a string or number
-%   1 - nback,nb, blue; 
-%   2 - interference, int, red;
-%   3 - congruent, cong, green;
-%   4 - mix (mix1,mix2,mix3,mix4);
-% negative numbers are practice of the positive number (imply 'practice')
-%  - practice has sounds
-%  - will stop early if accuracy is good
-%
-% output is saved in behave/subj_block_time.mat and behave/csv/subj_block_time
 function nBMSI(subj,blocktype,varargin)
+%% NBMSI - n-Back Multi-Source Interference
+%%
+%% USAGE: nBMSI(subj,blocktype)
+%%   or   nBMSI subj blocktype
+%% EXAMPLE:
+%%
+%%  nBMSI 12345 congr
+%%  nBMSI 12345 nback practice % run nback, show extended instructions
+%%  nBMSI 12345 -1             % same as above
+%%  nBMSI 12345 congr practice Admin_PC % force MR computer, show more instructions
+%%
+%% block type can be given as a string or number
+%%   1 - nback,nb, blue;
+%%   2 - interference, int, red;
+%%   3 - congruent, cong, green;
+%%   4 - mix (mix1,mix2,mix3,mix4);
+%%  10 - in/cog{1,2,3,4}: no nback. cog and incog only
+%%
+%% negative numbers are practice of the positive number (imply 'practice')
+%%  - practice has sounds
+%%  - will stop early if accuracy is good
+%%
+%% output is saved in behave/subj_block_time.mat and behave/csv/subj_block_time
+
+ if(nargin < 1)
+    help('nBMSI');
+    error('USAGE: nBMSI subjid in/cog1 practice');
+ end
+
  origblockname=blocktype;
  % block type should be a number
  blocktype = blockName2Num(blocktype);
@@ -27,23 +35,23 @@ function nBMSI(subj,blocktype,varargin)
 
  % subject should be a string
  if isfloat(subj), subj=num2str(subj);  end
- 
+
  [savename,dstr] = formatSaveName(subj,blocktype);
  diary([savename '_log.txt']);
- 
+
  % make sure we set practice when we give a negative block number
  if blocktype < 1; varargin = {varargin{:}, 'practice'}; end
  % get settings
  s = getSettings('init',varargin{:});
- 
- %20150123 - WF+SM@MRRC 
- %  cd to private b/c genEvent depends on functions in that directory 
+
+ %20150123 - WF+SM@MRRC
+ %  cd to private b/c genEvent depends on functions in that directory
  %  ML2011a (MR version):  private/function.m does not have access to other functions in private/
  sOctave = exist('OCTAVE_VERSION', 'builtin') ~= 0;
  if(~sOctave);cd private;end
  [e, emat] = genEventList(blocktype);
  if(~sOctave);cd ..;end
- 
+
 
  if isfield(emat.inf,'congidx')
    fprintf('cong intference trials on:\n');
@@ -70,9 +78,9 @@ function nBMSI(subj,blocktype,varargin)
 
       fprintf('%d %s %s @ %.3f for %.2f\n',...
               trl, e(ei).tt, ename,e(ei).onset, e(ei).duration);
-      
+
       res{ei}= efunc(w,onset,params{:});
-      
+
       % include other useful info
       res{ei}.trl=trl;
       res{ei}.tt=e(ei).tt;
@@ -85,7 +93,7 @@ function nBMSI(subj,blocktype,varargin)
       if s.pracsett.ispractice && isfield(res{ei},'seqCrct')
         % play noise if we're wrong/too slow
         playSound(1,res{ei}.seqCrct);
-        
+
         % end practice early if they're doing well
         if practiceEndEarly(res(1:ei),abs(blocktype))
          break
@@ -94,9 +102,8 @@ function nBMSI(subj,blocktype,varargin)
       end
 
     end
-    
 
-    
+
     % draw final fixation for s.endITI seconds
     % then say good job
     lastonset = event_Fix(w,GetSecs(), s.colors.iticross,s.colors.pd.ITI,255);

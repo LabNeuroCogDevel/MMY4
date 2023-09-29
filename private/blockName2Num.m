@@ -26,16 +26,17 @@ function bn = blockName2Num(blockname)
            bn=4;
      
      case {'mix1','mix2','mix3',...
-                 'mix4','mix5','mix6'}
+           'mix4','mix5','mix6'}
        bn=str2double(blockname(4))+3;
+
+     % 20230925 in/cog set to 10
+     % see private/genEventList.m
+     case {'in/cog1','in/cog2','in/cog3',...
+           'in/cog4','in/cog5','in/cog6'}
+       bn=str2double(blockname(7))+10;
        
      otherwise
        bn=str2double(blockname);
 
    end
-
-   if(bn>9 || bn<-9)
-     error('what blockname did you mean?');
-   end
-
 end

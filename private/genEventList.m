@@ -17,7 +17,14 @@ function [e mat] = genEventList(blocktypes)
       % negative block types are practice
       % 0 is practice mix
       blocktypes=abs(blocktypes);
-      if blocktypes > 3 || blocktypes == 0; blocktypes=4; end
+
+      % no nback
+      if blocktypes >= 10
+         blocktypes=10;
+      % mix
+      elseif blocktypes > 3 || blocktypes == 0;
+         blocktypes=4;
+      end
 
 
       %% build conditions
@@ -25,6 +32,8 @@ function [e mat] = genEventList(blocktypes)
       % if 4, mixed random
       % if 5,6 mixed
       % 20150122WF 
+      % if >10 mix but no nback
+      % 20230925WF
       %
       % also set total number of trials n based on blocktype
       % and get random sequences for display
@@ -61,7 +70,7 @@ function [e mat] = genEventList(blocktypes)
            error('number of events is not divs by %d!',ntrltypes)
          end
          nminiblock=events.nminblocks;
-         nprobe=nbks.nprobe;
+         nprobe=0;
 
          [ttvec,nbk,inf,cng] = genMixed(n,ntrltypes,nminiblock,nprobe,nbnum);
          randIdx=ttvec;
@@ -76,9 +85,30 @@ function [e mat] = genEventList(blocktypes)
       %   length(infseq)
       %   n=length(randIdx);
 
+      elseif blocktypes == 10
+         n=events.nTrl;
+         types={'Interfere', 'Congruent'};
+         ntrltypes=length(types);
+         if mod(n,ntrltypes)~=0
+           error('number of events (%d) is not divs by %d!',n, ntrltypes)
+         end
+         nminiblock=events.nminblocks;
+         nprobe=0;
+
+         fprintf("no nback: genMixed:\n"); disp([n,ntrltypes,nminiblock,nprobe,nbnum]);
+         [ttvec,nbk,inf,cng] = genMixed(n,ntrltypes,nminiblock,nprobe,nbnum);
+         randIdx=ttvec;
       else
          error('unknown blocktype %d',blocktyes);
       end
+      
+      % what ttvec index is what trial type
+
+      NBK_TTi = strmatch('Nback',types);
+      INF_TTi = strmatch('Interfere',types);
+      CNG_TTi = strmatch('Congruent',types);
+
+      fprintf('blocktype: %d\n', blocktypes)
 
       %% format outputs for putting into events
       %   ... accomidate old code
@@ -99,6 +129,8 @@ function [e mat] = genEventList(blocktypes)
       %WF20150224 -- move into function
       ITIs=genITI(n,time.ITI.mu,time.ITI.min);
 
+
+      fprintf('itis: %d\n', length(ITIs))
 
       %% build events list
       
@@ -161,7 +193,7 @@ function [e mat] = genEventList(blocktypes)
         e(si).duration=time.(tt).wait;
 
         if strncmp('Nback',tt,5)
-           seqidx=sum(randIdx(1:t)==1);
+           seqidx=sum(randIdx(1:t)==NBK_TTi);
            mat.crctkey(t)= nbk.seqi(seqidx);
 
            e(si).func=@event_Nback;
@@ -169,7 +201,7 @@ function [e mat] = genEventList(blocktypes)
                            nbackseq{seqidx},...
                            isnback(seqidx) };
         elseif strncmp('Interfere',tt,9)
-           seqidx=sum(randIdx(1:t)==2);
+           seqidx=sum(randIdx(1:t)==INF_TTi);
            mat.crctkey(t)= inf.seqi(seqidx);
 
            e(si).func=@event_Interfere;
@@ -177,7 +209,7 @@ function [e mat] = genEventList(blocktypes)
                            infseq{seqidx} };
 
         elseif strncmp('Congruent',tt,9)
-           seqidx=sum(randIdx(1:t)==3);
+           seqidx=sum(randIdx(1:t)==CNG_TTi);
            mat.crctkey(t)= cng.seqi(seqidx);
 
            e(si).func=@event_Nback;

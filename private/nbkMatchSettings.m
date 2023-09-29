@@ -4,9 +4,10 @@
 %    use mg_findAvailable to support consProbes min/max in settings
 %    use mg_switchNbk to switch out bad and good  
 %
+
 function nbk =  nbkMatchSettings(n,nProbe,back,v)
  % if we actually dont want anything, pass that through
- if n == 0
+ if n == 0 || nProbe == 0
    [nbk.seq, nbk.bool, nbk.seqi] = ...
      genNbackSeq( 0,0,0);
    return
