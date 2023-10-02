@@ -4,14 +4,20 @@ Task switching between interference/incongruent oddball selection and n-back con
 ![task instructions](img/instructions.svg)
 
 ## run
-in `octave` or `matlab` with [`PTB`](http://psychtoolbox.org/download/)
+in `octave` or `matlab` with [`PTB`](http://psychtoolbox.org/download/). Use arrow keys to respond. For MRI and MEG hostnames hard coded in [`private/getSettings.m`](private/getSettings.m), use glove/buttonbox keys, keyboard numbers 1-3.
 
 ```matlab
+nBMSI subjname 3
+
+% SAME AS
 subj='subjname' % subjectname for matfile
-runtype=3       % 1=nback,2=interference,3=cong, >=4 mixed
+runtype=3       % 1=nback,2=interference,3=cong, >=4 mixed, >= 10 mix without nback
 
 nBMSI(subj,runtype)
 ```
+
+## Info
+in matlab see `help nBMSI`, same as top of [`nBMSI`](nBMSI.m)
 
 ## Install
 ```matlab
