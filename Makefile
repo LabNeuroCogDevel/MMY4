@@ -13,6 +13,11 @@ Psychtoolbox-3/Psychtoolbox/PsychBasic/Octave5LinuxFiles64/Screen.mex:
 		octave --eval 'linuxmakeitoctave3'
 	ldd $@ | grep not\ found && exit 1
 
+ssh/:
+	wget https://www.mathworks.com/matlabcentral/mlc-downloads/downloads/e5881c25-4a80-11e4-9553-005056977bd0/e41839fb-9b33-47f4-9d94-60fce8395aa1/packages/zip/ssh2_v2_m1_r7.zip
+	unzip -d sshtmp/ ssh2_v2_m1_r7.zip
+	mv sshtmp/ssh2_v2* ssh/
+    rm -r sshtmp/
 
 ###
 # if gstream and libdc1394 match expected could just download.
