@@ -130,12 +130,14 @@ function setting=getSettings(varargin)
 
     % event settings
     s.events.nTrl    = 60; % number trials
+    s.events.nTrlNoNbk=40; % no nback? 2*20 for just cog and incog
     s.events.nPureBlk= 35; % number of trials for not mix blocks
     s.events.nInfPureCng=4;% number of trials that will be congruent
                            %   in the pure inteference block
 
     s.events.nminblocks=12;% number of miniblocks
                            % nSwitches = nminblocks -1
+    s.events.nminblocksNoNbk=8; % 3*2
 
 
 

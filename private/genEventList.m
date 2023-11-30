@@ -86,13 +86,15 @@ function [e mat] = genEventList(blocktypes)
       %   n=length(randIdx);
 
       elseif blocktypes == 10
-         n=events.nTrl;
+         % 20231130: 40 trials between 2 types (cog, incog)
+         %   instead of default nTrl (60) for all 3
+         n=events.nTrlNoNbk;
          types={'Interfere', 'Congruent'};
          ntrltypes=length(types);
          if mod(n,ntrltypes)~=0
            error('number of events (%d) is not divs by %d!',n, ntrltypes)
          end
-         nminiblock=events.nminblocks;
+         nminiblock=events.nminblocksNoNbk;
          nprobe=0;
 
          fprintf("no nback: genMixed:\n"); disp([n,ntrltypes,nminiblock,nprobe,nbnum]);

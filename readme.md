@@ -92,8 +92,8 @@ from `private/blockName2Num.m`
 ### Timing
 from `private/getSettings.m`
 ```
-
-s.events.nTrl    = 60; % number trials
+% number trials; 
+s.events.nTrl    = 60; % 40 if cog+incog only (no nback); 35 for pure block
 
     s.time.Nback.wait=1.5;     s.time.Nback.cue=.5;
 s.time.Interfere.wait=1.3; s.time.Interfere.cue=.5;
