@@ -17,7 +17,7 @@ function playSound(ispractice,iscorrect)
     % should still work if we are in private dir
     if ~exist(filename,'file'), filename=['../' filename];end
 
-    [y, freq] = wavread(filename);
+    [y, freq] = audioread(filename);
     % only want one channel
     incrctsnd= y(:,1)';
  end
