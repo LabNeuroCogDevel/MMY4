@@ -6,3 +6,4 @@ Rplots.pdf
 private/genEventMixed.m
 private/genMiniBlockLengths.m
 private/genMixEvents.m
+*.asv

@@ -1,0 +1,2 @@
+Rem start "" "C:\Program Files\MATLAB\R2015b\bin\matlab.exe" "-r" "cd C:\Users\localadmin\Desktop\SPASwitch_Cog_Inf"
+"C:\Program Files\MATLAB\R2015b\bin\matlab.exe" "-r" "cd C:\Users\localadmin\Desktop\SPASwitch_Cog_Inf"
