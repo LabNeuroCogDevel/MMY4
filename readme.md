@@ -138,3 +138,9 @@ d_info |>
 |8|60        |   76 |      3.73 | 0.0163 |
 |9|60        |   76 |      3.73 | 0.0120 |
 
+
+
+MR for 2 only (cog/incog, no n-back)
+```
+xx GOOD JOB @ 148.853
+```

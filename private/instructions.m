@@ -9,6 +9,10 @@
 function instructions(w,bn,varargin)
 
     taskdir=pwd;
+    overview_image = 'img/overview.png';
+    if bn>=10,
+       overview_image = 'img/instruct_cog_inf_only.png';
+    end
     
     %% should we go through the practice slides?
     practice=getSettings('pracsett');
@@ -55,7 +59,7 @@ function instructions(w,bn,varargin)
         ['img/congr.png'], ...
      } ...
       ... block num 4 = mix = switch = blue/red/green 
-      'img/overview.png'
+      overview_image
     };
 
     if practice.ispractice
@@ -68,7 +72,7 @@ function instructions(w,bn,varargin)
       ];
     else
       % add the overview screen
-      instruct = [ instruct, {'img/overview.png'} ];
+      instruct = [ instruct, {overview_image} ];
     end 
 
 
