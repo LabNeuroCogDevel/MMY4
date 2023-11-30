@@ -59,7 +59,9 @@ function setting=getSettings(varargin)
       s.host.isMEG=1;
       s.screen.res=[1280 1024];
       
-     elseif strncmp(host,'upmc_56ce704785',15) %Practice comp
+     % MR Practice comp/lab behavioral
+     elseif strncmp(host,'upmc_56ce704785',15) || ...
+            strncmp(host,'OACWIN71LOEFF88',15)
       s.host.type='Behave';
       s.host.isMR=0;
       s.host.isBehave=1;
@@ -92,11 +94,12 @@ function setting=getSettings(varargin)
      % use fingers:  index  middle ring
      if s.host.isMR || s.host.isMEG
        % Button Glove index: middle, ring
-       s.keys.finger = KbName({'2@','3#','4$'}); 
+       s.key.names = {'2@','3#','4$'};
      else
        %s.keys.finger = KbName({'j','k','l'}); % TESTING
-       s.keys.finger = KbName({'LeftArrow','DownArrow','RightArrow'}); 
+       s.keys.names = {'LeftArrow','DownArrow','RightArrow'};
      end
+     s.keys.finger = KbName(s.keys.names);
      
      % string corresponding to finger
      % MUST BE numeric
