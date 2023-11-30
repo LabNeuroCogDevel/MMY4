@@ -10,7 +10,8 @@ function instructions(w,bn,varargin)
 
     taskdir=pwd;
     overview_image = 'img/overview.png';
-    if bn>=10,
+    % cog+inf only (no nback) for cog and inf pure blocks and non-nback mix
+    if bn>=10 || bn==2 || bn==3
        overview_image = 'img/instruct_cog_inf_only.png';
     end
     
@@ -24,15 +25,17 @@ function instructions(w,bn,varargin)
     % hard coded :(
     %keys=getSettings('keys');
 
-    colors=getSettings('colors');
+    % never use colors. they stay the same for all/now hardcoded
+    %colors=getSettings('colors');
 
-    
+    keys = getSettings('keys');
     % always start with same instructions
     instruct = {...
     [ ...
       'In this game, you will see sets of 3 numbers.\n\n',...
       'One of the numbers will be different.\n\n',...
-      'Always push the button for the DIFFERENT number.'...
+      'Always push the button for the DIFFERENT number.\n\n\n'...
+      'Index finger on "' keys.names{1} '"'
     ]};
 
     blockspecificinstruct={ ...
