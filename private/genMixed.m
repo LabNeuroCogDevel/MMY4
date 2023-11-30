@@ -20,7 +20,7 @@ function [ttvec, nbk,inf,cng] = genMixed(N,n_etype,n_blocks,nprobe,nback)
  mu      = N/n_blocks;  %5 : average num trials in each miniblock
  n_mini  = t_trlblk/mu; %8 : number of miniblocks of each type 
                         %6   when no nback
- printf('\n# genMixed: %d total over %d blocks and %d types (%d/type) with %d trials per block\n',...
+ fprintf('\n# genMixed: %d total over %d blocks and %d types (%d/type) with %d trials per block\n',...
          N, n_blocks, n_etype, t_trlblk, mu);
 
  % generate miniblock trial counts

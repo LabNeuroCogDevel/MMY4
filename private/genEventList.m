@@ -97,11 +97,11 @@ function [e mat] = genEventList(blocktypes)
          nminiblock=events.nminblocksNoNbk;
          nprobe=0;
 
-         fprintf("no nback: genMixed:\n"); disp([n,ntrltypes,nminiblock,nprobe,nbnum]);
+         fprintf('no nback: genMixed:\n'); disp([n,ntrltypes,nminiblock,nprobe,nbnum]);
          [ttvec,nbk,inf,cng] = genMixed(n,ntrltypes,nminiblock,nprobe,nbnum);
          randIdx=ttvec;
       else
-         error('unknown blocktype %d',blocktyes);
+         error('unknown blocktype %d',blocktypes);
       end
       
       % what ttvec index is what trial type
