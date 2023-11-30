@@ -2,16 +2,18 @@
 %   copy any 'log.txt', '.csv', and '.mat' files of the
 %   "savename" given as input to the function
 function copyFiles(subj,dstr,savename)
- % setup ssh
- addpath('private/ssh');
- addpath('ssh');
- sshhost='arnold.wpic.upmc.edu';
  
  % setup smb
- copybase='B:/bea_res/Data/Tasks/Switch_MMY4/Behave';
-
+ %copybase='L:/bea_res/Data/Tasks/Switch_SPA/Behave';
+ % 2023-11-30 copy to hera. automate copying to bea_res from there
+ copybase='H:\Raw\Task\SwitchSPA\';
  host=getSettings('host');
- % we dont expect to find B if we are at MR or MEG
+ 
+ if isfield(host,'isBehave')
+     copybase=fullfile(copybase,'Behave');
+ end
+ 
+ % we dont expect to find local mounts if we are at MR or MEG
  if  exist(copybase,'dir')
   savedir=[copybase '/' subj];
   mkdir(savedir);
@@ -29,7 +31,14 @@ function copyFiles(subj,dstr,savename)
 
  % we have ssh
  elseif 0 && isfield(host,'isMEG') && host.isMEG
-  spath=['/Users/lncd/rcn/bea_res/Data/Tasks/Switch_MMY4/MEG/' subj '/' dstr ];
+  % setup ssh
+  if exist('private/ssh','dir'),
+    addpath('private/ssh');
+  elseif exist('ssh','dir'),
+    addpath('ssh');
+  end
+  sshhost='rhea.wpic.upmc.edu';
+  spath=['/Volumes/L/bea_res/Data/Tasks/Switch_SPA/MEG/' subj '/' dstr ];
   fprintf('transfering to %s:%s\n',sshhost,spath);
   conn = ssh2_config(sshhost,'lncd','B@ngal0re');
   command_output = ssh2_command(conn,['mkdir -p ' spath] );
