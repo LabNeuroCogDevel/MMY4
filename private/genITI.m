@@ -7,6 +7,19 @@ function ITIs = genITI(n,mu,tmin)
    ITIs = repmat(mu,1,n);
    return
   end
+  if ~exist('exprnd')
+      % see genFixedITI.m
+      if n == 40 && abs(mu - 1.76666)<1e-4 && tmin == 1
+          preiti = load('iti_mix_nonbk.mat');
+      elseif n == 35 && abs(mu - 1.76666)<1e-4 && tmin == 1
+          preiti = load('iti_pure.mat');
+      else
+          n, mu, tmin,
+          error('do not have exprnd function or pre-generated itis for settings');
+      end
+      ITIs = preiti.iti(:,randi(length(preiti.iti)))';
+      return
+  end
 
   %% otherwise we want an exp dist iti
   % how to adjust exp dist
@@ -14,21 +27,20 @@ function ITIs = genITI(n,mu,tmin)
   ITIs=zeros(1,n);
   ITI_expect_dur = (n+1)*mu; 
   MAX_DIFF=.5; % total range is 1 second. will adjust later
-  %while(abs(sum(ITIs)-ITI_expect_dur) > MAX_DIFF )
-  % ITIs=exprnd(mu - adjust,1,n+1) + adjust; % min value is adjust
-  while(abs(sum(ITIs)-(n+1)*mu) > .5 )
-   ITIs=exprnd( mu - adjust ,1,n+1) + adjust; % min value is adjust
+  while(abs(sum(ITIs)-ITI_expect_dur) > MAX_DIFF )
+   ITIs=exprnd(mu - adjust,1,n+1) + adjust; % min value is adjust
+  %while(abs(sum(ITIs)-(n+1)*mu) > .5 )
+  % ITIs=exprnd( mu - adjust ,1,n+1) + adjust; % min value is adjust
   end
 
   % 20231207 - make sure we match mean by redistributing extra
   % HACK. not guarantied to converge
-  %while(abs(sum(ITIs) - ITI_expect_dur)>10e-5)
-  %   spare = ITIs - tmin;
-  %   ITI_extra = sum(ITIs) - ITI_expect_dur;
-  %   adjust_by = ITI_extra/nnz(spare>0);
-  %   ITIs = ITIs - min(adjust_by,spare);
-  %   break
-  %end
+  while(abs(sum(ITIs) - ITI_expect_dur)>10e-3)
+     spare = ITIs - tmin;
+     ITI_extra = sum(ITIs) - ITI_expect_dur;
+     adjust_by = ITI_extra/nnz(spare>0);
+     ITIs = ITIs - min(adjust_by,spare);
+  end
 end
 
 %!test 'is mean (within 10e-5)'
