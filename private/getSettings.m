@@ -85,7 +85,12 @@ function setting=getSettings(varargin)
      
      fprintf('screen res: %d %d %s\n',s.screen.res,s.host.name);     
      s.info.MLversion= version();
-     s.info.PTBversion = PsychtoolboxVersion();
+     if exist('PsychtoolboxVersion')
+       s.info.PTBversion = PsychtoolboxVersion();
+     else
+       s.info.PTBversion = "NONE";
+       %KbName = @(x) x;
+     end
      fprintf('Versions: %s PTB %s\n',s.info.MLversion,s.info.PTBversion);
 
 
