@@ -144,3 +144,23 @@ MR for 2 only (cog/incog, no n-back)
 ```
 xx GOOD JOB @ 148.853
 ```
+
+
+```
+ t=zeros(3,10); % inf, cog, mix
+
+s = getSettings('init','Admin_PC'); % for MR timing
+for i = 1:length(t),
+ [e, emat] = genEventList(2) ; t(1,i)=[e.onset](end)+12;
+ [e, emat] = genEventList(3) ; t(2,i)=[e.onset](end)+12;
+ [e, emat] = genEventList(11); t(3,i)=[e.onset](end)+12;
+end
+
+ [min(t,[],2), mean(t,2), max(t,[],2)]
+```
+
+```
+iti=zeros(s.events.nTrlNoNbk+1,100); for i = 1:length(iti), iti(:,i) = genITI(s.events.nTrlNoNbk,s.time.ITI.mu,s.time.ITI.min); end
+
+range(mean(iti') - s.time.ITI.mu)
+```

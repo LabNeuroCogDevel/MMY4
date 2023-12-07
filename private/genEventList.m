@@ -130,8 +130,6 @@ function [e mat] = genEventList(blocktypes)
       %  NB. will wait full resp time after button push, so fix time will be greater
       %WF20150224 -- move into function
       ITIs=genITI(n,time.ITI.mu,time.ITI.min);
-
-
       fprintf('itis: %d\n', length(ITIs))
 
       %% build events list
