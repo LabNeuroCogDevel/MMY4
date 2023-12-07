@@ -147,20 +147,24 @@ xx GOOD JOB @ 148.853
 
 
 ```
- t=zeros(3,10); % inf, cog, mix
-
+t=zeros(3,10); % inf, cog, mix
 s = getSettings('init','Admin_PC'); % for MR timing
 for i = 1:length(t),
- [e, emat] = genEventList(2) ; t(1,i)=[e.onset](end)+12;
- [e, emat] = genEventList(3) ; t(2,i)=[e.onset](end)+12;
- [e, emat] = genEventList(11); t(3,i)=[e.onset](end)+12;
+ [e, emat] = genEventList(2) ;x=[e.onset]; t(1,i)=x(end)+12;
+ [e, emat] = genEventList(3) ;x=[e.onset]; t(2,i)=x(end)+12;
+ [e, emat] = genEventList(11);x=[e.onset]; t(3,i)=x(end)+12;
 end
 
- [min(t,[],2), mean(t,2), max(t,[],2)]
+[min(t,[],2), mean(t,2), max(t,[],2)]
+
+
+133.5735  135.3606  136.4175
+122.2277  125.2909  126.5234
+145.4405  147.3289  148.3090
 ```
 
 ```
 iti=zeros(s.events.nTrlNoNbk+1,100); for i = 1:length(iti), iti(:,i) = genITI(s.events.nTrlNoNbk,s.time.ITI.mu,s.time.ITI.min); end
-
-range(mean(iti') - s.time.ITI.mu)
+max(abs(sum(iti) - s.time.ITI.mu*(s.events.nTrlNoNbk+1)))
+    0.0091
 ```
