@@ -35,8 +35,10 @@ function setting=getSettings(varargin)
         [returned,host] = system('hostname');
         host=strtrim(host);
         host(host=='-')='_';
-     else 
+        fprintf('# settings from hostname "%s"\n', host)
+     else
         host = varargin{1};
+        fprintf('# forcing host to "%s"\n', host)
      end 
 
      % behave true => fixed .5sec ITI
@@ -45,13 +47,13 @@ function setting=getSettings(varargin)
      s.host.name = host;
      
      if strncmp(host,'Admin_PC',8) ||...   % MRCTR
-        strncmp(host,'MRRCNewwin7-PC',15)  % BST3 7T
+        strncmp(host,'MRRCNewwin7_PC',15)  % BST3 7T
       s.host.type='MR';
       s.host.isMR=1;
       s.host.isBehave=0;
       s.host.isMEG=0;
       s.screen.res=[1024 768];   
-      fprintf('running MR\n');
+      fprintf('# running MR\n');
       
      elseif strncmp(host,'PUH1DMEG03',5) %MEG
       s.host.type='MEG';
@@ -59,6 +61,8 @@ function setting=getSettings(varargin)
       s.host.isBehave=1;
       s.host.isMEG=1;
       s.screen.res=[1280 1024];
+      fprintf('# running MEG\n');
+
       
      % MR Practice comp/lab behavioral
      elseif strncmp(host,'upmc_56ce704785',15) || ...
@@ -68,13 +72,15 @@ function setting=getSettings(varargin)
       s.host.isBehave=1;
       s.host.isMEG=0;
       s.screen.res=[1440 900];
+      fprintf('# running known behave\n');
       
      else
       s.host.type='Unknown';
       s.host.isMR=0;
       s.host.isBehave=1;
       s.host.isMEG=0;
-      s.screen.res=[1024 768];   
+      s.screen.res=[1024 768];
+      fprintf('# running behave for unknown host "%s"\n', host);
      end
      
      fprintf('screen res: %d %d %s\n',s.screen.res,s.host.name);     
@@ -96,7 +102,7 @@ function setting=getSettings(varargin)
      if s.host.isMR || s.host.isMEG
        % Button Glove index: middle, ring
        fprintf('# Using buttonbox keys\n');
-       s.key.names = {'2@','3#','4$'};
+       s.keys.names = {'2@','3#','4$'};
      else
        fprintf('# Using keyboard keys\n');
        %s.keys.finger = KbName({'j','k','l'}); % TESTING
