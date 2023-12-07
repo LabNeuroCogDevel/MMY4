@@ -44,7 +44,8 @@ function setting=getSettings(varargin)
      % MEG         => send trigger codes and photodiode
      s.host.name = host;
      
-     if strncmp(host,'Admin_PC',8) % MRCTR
+     if strncmp(host,'Admin_PC',8) ||...   % MRCTR
+        strncmp(host,'MRRCNewwin7-PC',15)  % BST3 7T
       s.host.type='MR';
       s.host.isMR=1;
       s.host.isBehave=0;
@@ -94,8 +95,10 @@ function setting=getSettings(varargin)
      % use fingers:  index  middle ring
      if s.host.isMR || s.host.isMEG
        % Button Glove index: middle, ring
+       fprintf('# Using buttonbox keys\n');
        s.key.names = {'2@','3#','4$'};
      else
+       fprintf('# Using keyboard keys\n');
        %s.keys.finger = KbName({'j','k','l'}); % TESTING
        s.keys.names = {'LeftArrow','DownArrow','RightArrow'};
      end
@@ -115,7 +118,7 @@ function setting=getSettings(varargin)
     % color for number sequences
     s.colors.seqtext       = [0   0   0  ];
     s.colors.iticross      = [255 255 255];
-    s.colors.Fix.Nback     = [42  155 220] %[0   0   155];
+    s.colors.Fix.Nback     = [42  155 220];%[0   0   155];
     s.colors.Fix.Interfere = [245 93  133];%[155 0   0  ];
     s.colors.Fix.Congruent = [23  168  87];%[0   155 0  ];
     % http://vis4.net/labs/colorvis/embed.html?m=hcl&gradients=12
