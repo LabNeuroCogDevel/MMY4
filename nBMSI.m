@@ -47,11 +47,14 @@ function nBMSI(subj,blocktype,varargin)
  %20150123 - WF+SM@MRRC
  %  cd to private b/c genEvent depends on functions in that directory
  %  ML2011a (MR version):  private/function.m does not have access to other functions in private/
- sOctave = exist('OCTAVE_VERSION', 'builtin') ~= 0;
- if(~isOctave);cd private;end
- else; addpath('private'); pkg('load','statistics'); end
+ isOctave = exist('OCTAVE_VERSION', 'builtin') ~= 0;
+ if(~isOctave)
+     cd private
+ else
+     addpath('private'); pkg('load','statistics')
+ end
  [e, emat] = genEventList(blocktype);
- if(~sOctave);cd ..;end
+ if(~isOctave);cd ..;end
 
 
  if isfield(emat.inf,'congidx')
