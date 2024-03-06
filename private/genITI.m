@@ -7,15 +7,20 @@ function ITIs = genITI(n,mu,tmin)
    ITIs = repmat(mu,1,n);
    return
   end
+  fprintf('#gen itis using n mu tmin\n')
+  [n, mu, tmin],
   if ~exist('exprnd')
       % see genFixedITI.m
       if n == 40 && abs(mu - 1.76666)<1e-4 && tmin == 1
           preiti = load('iti_mix_nonbk.mat');
+      elseif n == 120 && abs(mu - 1.76666)<1e-4 && tmin == 1
+          preiti = load('iti_mix_nonbk.mat');
+          preiti.iti = [preiti.iti; preiti.iti; preiti.iti];
       elseif n == 35 && abs(mu - 1.76666)<1e-4 && tmin == 1
           preiti = load('iti_pure.mat');
       else
           n, mu, tmin,
-          error('do not have exprnd function or pre-generated itis for settings');
+          error('do not have exprnd function or pre-generated itis (private/iti_mix_nonbk.mat) for settings');
       end
       ITIs = preiti.iti(:,randi(length(preiti.iti)))';
       return

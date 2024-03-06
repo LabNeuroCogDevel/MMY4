@@ -61,7 +61,10 @@ function nBMSI(subj,blocktype,varargin)
     [e, emat] = genEventList(blocktype);
  catch genfailed
      if(~isOctave), cd ..; end
-     error(genfailed)
+     genfailed,
+     genfailed.stack.file(1),
+     genfailed.stack.line(1),
+     error('failed to generate a event list')
  end
 
  % 20240306 - useful to have esp. at scan time

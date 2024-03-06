@@ -1,1 +1,1 @@
-"C:\Program Files\MATLAB\R2020b\bin\matlab.exe" "-r" "cd C:\Users\Luna\Desktop\SPASwitch_Cog_Inf"
+"C:\Program Files\MATLAB\R2020b\bin\matlab.exe" "-r" "cd C:\Users\Luna\Desktop\SPASwitch_Cog_Inf; switchtask"
