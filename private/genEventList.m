@@ -19,9 +19,11 @@ function [e mat] = genEventList(blocktypes)
       blocktypes=abs(blocktypes);
 
       % no nback
-      if blocktypes >= 10
+      if blocktypes >= 20
+         blocktypes=20;
+      elseif blocktypes >= 10
          blocktypes=10;
-      % mix
+      % mix with nback, interfere, and congruent
       elseif blocktypes > 3 || blocktypes == 0;
          blocktypes=4;
       end
@@ -94,7 +96,23 @@ function [e mat] = genEventList(blocktypes)
          if mod(n,ntrltypes)~=0
            error('number of events (%d) is not divs by %d!',n, ntrltypes)
          end
-         nminiblock=events.nminblocksNoNbk;
+         nminiblock=events.nminblocksNoNbk; % 8 (2*4)
+         nprobe=0;
+
+         fprintf('no nback: genMixed:\n'); disp([n,ntrltypes,nminiblock,nprobe,nbnum]);
+         [ttvec,nbk,inf,cng] = genMixed(n,ntrltypes,nminiblock,nprobe,nbnum);
+         randIdx=ttvec;
+
+      elseif blocktypes == 20
+         % 20240306: 120 trials between 2 types (cog, incog)
+         %   for MR. 3 x as many as behavioral for longer no nback mix
+         n=events.nTrlNoNbk * 3; % 120
+         nminiblock=events.nminblocksNoNbk * 3; % 24
+         types={'Interfere', 'Congruent'};
+         ntrltypes=length(types);
+         if mod(n,ntrltypes)~=0
+           error('number of events (%d) is not divs by %d!',n, ntrltypes)
+         end
          nprobe=0;
 
          fprintf('no nback: genMixed:\n'); disp([n,ntrltypes,nminiblock,nprobe,nbnum]);

@@ -44,6 +44,10 @@ function v=mg_blockvec(mu,n_mini, minlen,varargin)
   % 20230929 no nback changes breakdown of miniblocks
   if n_mini == 6
     v=Shuffle([3 3 4 4 6 10]);
+
+  elseif n_mini == 12
+    v=Shuffle([3 3 4 4 6 10 3 3 4 4 6 10]);
+
   end
 
   if ~(minlen <= min(v)  &&  ...

@@ -16,6 +16,8 @@ function nBMSI(subj,blocktype,varargin)
 %%   3 - congruent, cong, green;
 %%   4 - mix (mix1,mix2,mix3,mix4);
 %%  10 - in/cog{1,2,3,4}: no nback. cog and incog only
+%%  20 - longmix{1,2}; no nback. longer
+%%  see private/blockName2Num.m and private/genEventList.m
 %%
 %% negative numbers are practice of the positive number (imply 'practice')
 %%  - practice has sounds

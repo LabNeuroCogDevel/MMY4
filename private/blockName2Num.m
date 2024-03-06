@@ -34,6 +34,9 @@ function bn = blockName2Num(blockname)
      case {'in/cog1','in/cog2','in/cog3',...
            'in/cog4','in/cog5','in/cog6'}
        bn=str2double(blockname(7))+10;
+     % 20240306 new combined mixes for longer MR
+     case {'longmix1','longmix2'}
+       bn=str2double(blockname(end))+20;
        
      otherwise
        bn=str2double(blockname);
