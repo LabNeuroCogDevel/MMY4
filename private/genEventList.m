@@ -243,6 +243,11 @@ function [e mat] = genEventList(blocktypes)
 
       end
 
+      fprintf('# finished generating task. last task event at %.3f\n', ...
+              cumtime);
+      fprintf('\titi: %.2f mean * %d seen =%.2f\n', ...
+              mean(ITIs), length(ITIs), sum(ITIs))
+
 end
 
 %!test

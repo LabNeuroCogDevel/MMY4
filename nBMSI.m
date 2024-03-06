@@ -55,7 +55,19 @@ function nBMSI(subj,blocktype,varargin)
  else
      addpath('private'); pkg('load','statistics')
  end
- [e, emat] = genEventList(blocktype);
+ % if genEventList failes on matlab 2011 after we cd'ed
+ % we'll be in private and clueless as to why cmd from history doesn't run
+ try
+    [e, emat] = genEventList(blocktype);
+ catch genfailed
+     if(~isOctave), cd ..; end
+     error(genfailed)
+ end
+
+ % 20240306 - useful to have esp. at scan time
+ expect_total_dur = e(end).onset + e(end).duration + s.time.ITI.end;
+ fprintf('++ expect total duration: %.2f ++\n', expect_total_dur);
+
  if(~isOctave);cd ..;end
 
 
@@ -118,8 +130,9 @@ function nBMSI(subj,blocktype,varargin)
 
     save([savename '.mat'],'res','subj','blocktype', 'e', 'emat', 'savename','dstr','s', 'endtime','lastonset','starttime','endtime','origblockname');
 
-    fprintf('xx END ITI @ %0.3f for %0.2f\n',lastonset-starttime, s.time.ITI.end);
-    fprintf('xx GOOD JOB @ %0.3f\n',endtime-starttime);
+    fprintf('xx END ITI @ %0.3f. On for %0.2f\n',lastonset-starttime, s.time.ITI.end);
+    fprintf('xx GOOD JOB will be @ %0.3f\n',endtime-starttime);
+    fprintf('   expected duration  %0.3f\n', expect_total_dur);
     goodJob(w,endtime);
 
     % save output to csv file
