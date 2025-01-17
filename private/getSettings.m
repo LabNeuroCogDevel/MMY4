@@ -45,6 +45,7 @@ function setting=getSettings(varargin)
      % MR          => show getready screen
      % MEG         => send trigger codes and photodiode
      s.host.name = host;
+     s.host.isEEG=0; % added 20250116
      
      if strncmp(host,'Admin_PC',8) ||...   % MRCTR
         strncmp(host,'MRRCNewwin7_PC',15)  % BST3 7T
@@ -54,6 +55,17 @@ function setting=getSettings(varargin)
       s.host.isMEG=0;
       s.screen.res=[1024 768];   
       fprintf('# running MR\n');
+
+    % 20250116 - EEG at loeffler % TODO(20250117): get actual host name
+     elseif strncmp(host,'EEGWINPC',7)
+      s.host.type='Behave'
+      s.host.isBehave=1;
+      s.host.isMEG=0;
+      s.host.isEEG=1;
+      s.host.address = 888; % TODO(20250117): get address
+      s.host.isMR=0;
+      s.screen.res=[1024 768];
+      fprintf('# running EEG\n');
       
      elseif strncmp(host,'PUH1DMEG03',5) %MEG
       s.host.type='MEG';
