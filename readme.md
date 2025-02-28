@@ -168,3 +168,52 @@ iti=zeros(s.events.nTrlNoNbk+1,100); for i = 1:length(iti), iti(:,i) = genITI(s.
 max(abs(sum(iti) - s.time.ITI.mu*(s.events.nTrlNoNbk+1)))
     0.0091
 ```
+
+## EEG
+psychtoolbox requires older octave 7.3 (not 9.4 as of 2025-02-28). Parallel port was using matlab with io64. But no octave mex? use 
+### Downloads
+#### LPT
+ * https://www.highrez.co.uk/Downloads/InpOut32/default.htm
+ * https://display-corner.epfl.ch/index.php?title=ParPulse
+   * https://display-corner.epfl.ch/downloads/Octave73/parPulse.mex
+ * http://web.archive.org/web/20210211055927/http://apps.usd.edu/coglab/psyc770/IO64.html
+
+#### Octave
+ * https://github.com/Psychtoolbox-3/Psychtoolbox-3/releases/tag/3.0.19.16
+ * https://gnu.mirror.constant.com/octave/windows/octave-7.3.0-w64-installer.exe
+ * https://gstreamer.freedesktop.org/data/pkg/windows/1.22.5/msvc/gstreamer-1.0-msvc-x86_64-1.22.5.msi
+ * https://raw.githubusercontent.com/Psychtoolbox-3/Psychtoolbox-3/master/Psychtoolbox/PsychContributed/vcredist_x64_2015-2019.exe
+
+```matlab
+pkg install image statistics -forge
+```
+### Cedrus Button Box
+buttons 1, 2, 3
+```
+waitForResp(GetSecs(),GetSecs(),1.5)
+    raw = 176
+    port = 0
+    action = 1
+    button = 6
+    buttonID = right.inner
+    rawtime = 12.088
+    ptbfetchtime = 2.1646e+06
+ans = Inf
+>> waitForResp(GetSecs(),GetSecs(),1.5)
+    raw = 208
+    port = 0
+    action = 1
+    button = 7
+    buttonID = right.center
+    rawtime = 7.8080
+    ptbfetchtime = 2.1646e+06
+ans = Inf
+>> waitForResp(GetSecs(),GetSecs(),1.5)
+    raw = 16
+    port = 0
+    action = 1
+    button = 1
+    buttonID = right.outer
+    rawtime = 0.2030
+    ptbfetchtime = 2.1646e+06
+```

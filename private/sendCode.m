@@ -3,11 +3,11 @@
 % test code for MR  eixsts
 function  tcOnset = sendCode(code,varargin)
  tcOnset=0;
- 
+
  persistent isMEG;
  persistent isEEG;
  persistent address;
- 
+
  % get weither or not we are sending trigger codes
  % 20250117 isMEG or (new) isEEG
  if isempty(isMEG)
@@ -16,10 +16,14 @@ function  tcOnset = sendCode(code,varargin)
    isEEG=h.isEEG;
    % replaces isempty(address) check. TODO(20250117): consolidate the two
    if isfield(h,'address')
-      address = h.address
-      addpath('C:\toolboxes\io64');
-      config_io;
-      outp(address,0);
+      address = h.address;
+      if ~isEEG
+        addpath('C:\toolboxes\io64');
+        config_io;
+        outp(address,0);
+       else
+        parPulse(address,0,0,255,0)
+       end
    end
  end
 
@@ -32,37 +36,49 @@ function  tcOnset = sendCode(code,varargin)
  if(isempty(address))
      %DIOHANDLE=digitalio('parallel','lpt1');
      %addline(DIOHANDLE,0:7,0,'out');
+     % 2025-02-28 - windoes eeg is 0xD000 defined in getSettings
      address=888;
      addpath('C:\toolboxes\io64');
      config_io;
      outp(address,0);
  end
- 
+
  % write the trigger code out
  fprintf('\t%d trigger\n',code);
  %putvalue(DIOHANDLE,code);
- outp(address,code);
- tcOnset=getSecs();
 
- % wait 100ms and send 0 to clear the triggers 
+ % Win EGG on octave using parPulse. handles setting to 0
+ if isEEG
+   tcOnset=GetSecs(); % NB getting before b/c of built in wait.
+                      % non EEG version gets time after first ttl pulse sent
+   % 255 is mask = all pins
+   % 0.100 is time before resetting status to 0
+   parPulse(address,code,0,255,0.100)
+   return
+ else
+   outp(address,code);
+ end
+ tcOnset=GetSecs();
+
+ % wait 100ms and send 0 to clear the triggers
  %  so we dont have a sample above the desired value ( spikes in the trigger channel)
  %  the next time a trigger is sent
  % unless we said otherwise (e.g. with varargin={'dontsendzero'}  )
  %
  % this is most sketch when sending and clearing a code before waiting for keyboard input
  %   if we wait too long, we'll miss the key press!
- %   
+ %
  % and the wait could also throw off the timing if a response is made <.1s before the
  % end of the response window. then we'd wait to send 0 when when we should be flipping the next screen
  % so in this case we wont 0. conviently the following code is 255 (immune to spikes)
  if isempty(varargin)
   WaitSecs(.1);
-  %putvalue(DIOHANDLE,0); 
+  %putvalue(DIOHANDLE,0);
   outp(address,0);
  end
-   
+
 end
- 
+
  %% MRI write to parallelPort
  % persistant address
  %elseif(0)
@@ -77,4 +93,4 @@ end
  %    end
  %    outp(address,code);
  %end
- 
+

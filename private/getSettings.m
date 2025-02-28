@@ -23,15 +23,15 @@ function setting=getSettings(varargin)
    varargin(idxs) = [];
   end
 
-  
+
   % if we haven't defined s
   % or if we say 'init'
   % (re)define s
   if isempty(s) || opts.init
-
+     fprintf('# initializing host\n')
      %% get host name and set info related to it
      %% we can also specify a host name as an option
-     if isempty(varargin) 
+     if isempty(varargin)
         [returned,host] = system('hostname');
         host=strtrim(host);
         host(host=='-')='_';
@@ -39,34 +39,49 @@ function setting=getSettings(varargin)
      else
         host = varargin{1};
         fprintf('# forcing host to "%s"\n', host)
-     end 
+     end
 
      % behave true => fixed .5sec ITI
      % MR          => show getready screen
      % MEG         => send trigger codes and photodiode
      s.host.name = host;
      s.host.isEEG=0; % added 20250116
-     
+     s.host.buttonbox = 0; % added 20250228 -- cedrus on EEG
+
      if strncmp(host,'Admin_PC',8) ||...   % MRCTR
         strncmp(host,'MRRCNewwin7_PC',15)  % BST3 7T
       s.host.type='MR';
       s.host.isMR=1;
       s.host.isBehave=0;
       s.host.isMEG=0;
-      s.screen.res=[1024 768];   
+      s.screen.res=[1024 768];
       fprintf('# running MR\n');
 
-    % 20250116 - EEG at loeffler % TODO(20250117): get actual host name
-     elseif strncmp(host,'EEGWINPC',7)
+    % 20250116 - EEG at loeffler % set 20250228
+     elseif strncmp(host,'DESKTOP_I2CP6M6',15)
+      fprintf('# Windows Octave EEG!\n')
       s.host.type='Behave'
       s.host.isBehave=1;
       s.host.isMEG=0;
       s.host.isEEG=1;
-      s.host.address = 888; % TODO(20250117): get address
+      try
+        fprintf('# openning button box\n');
+        CedrusResponseBox('CloseAll');
+        s.host.buttonbox = CedrusResponseBox('Open', 'COM5')
+      catch e
+        disp(e)
+        fprintf('!!!ERROR ERROR ERROR\n !!!button box not connected?!\ncontinue with keybord?')
+        nobutton_continue = input('Continue? "y" for yes, otherwise will stop', 's');
+        if ~strncmp(nobutton_continue,'y',1), error('no button box'), end
+      end
+      % 20250117: from python, LPT = 3344 == D10
+      % but from system info: D000
+      s.host.address = 0xD000;
       s.host.isMR=0;
-      s.screen.res=[1024 768];
+      s.screen.res=[1920 1080];
+      s.screen.res=[800 600];
       fprintf('# running EEG\n');
-      
+
      elseif strncmp(host,'PUH1DMEG03',5) %MEG
       s.host.type='MEG';
       s.host.isMR=0;
@@ -75,7 +90,7 @@ function setting=getSettings(varargin)
       s.screen.res=[1280 1024];
       fprintf('# running MEG\n');
 
-      
+
      % MR Practice comp/lab behavioral
      elseif strncmp(host,'upmc_56ce704785',15) || ...
             strncmp(host,'OACWIN71LOEFF88',15)
@@ -85,7 +100,7 @@ function setting=getSettings(varargin)
       s.host.isMEG=0;
       s.screen.res=[1440 900];
       fprintf('# running known behave\n');
-      
+
      else
       s.host.type='Unknown';
       s.host.isMR=0;
@@ -94,8 +109,8 @@ function setting=getSettings(varargin)
       s.screen.res=[1024 768];
       fprintf('# running behave for unknown host "%s"\n', host);
      end
-     
-     fprintf('screen res: %d %d %s\n',s.screen.res,s.host.name);     
+
+     fprintf('screen res: %d %d %s\n',s.screen.res,s.host.name);
      s.info.MLversion= version();
      if exist('PsychtoolboxVersion')
        s.info.PTBversion = PsychtoolboxVersion();
@@ -106,7 +121,7 @@ function setting=getSettings(varargin)
      fprintf('Versions: %s PTB %s\n',s.info.MLversion,s.info.PTBversion);
 
 
-     
+
      %s.screen.res=[800 600];   % any computer, testing
      %s.screen.res=[1600 1200]; % will's computer
      %s.screen.res=[1280 1024]; %test computer in Loeff
@@ -126,7 +141,13 @@ function setting=getSettings(varargin)
        s.keys.names = {'LeftArrow','DownArrow','RightArrow'};
      end
      s.keys.finger = KbName(s.keys.names);
-     
+
+     if s.host.buttonbox
+        % ButtonID = right.inner, right.center, right.outer
+        % fingers are 'evt.button'
+        s.keys.finger = [6 7 1];
+     endif
+
      % string corresponding to finger
      % MUST BE numeric
      s.keys.string = {'1','2','3'};
@@ -171,7 +192,7 @@ function setting=getSettings(varargin)
 
 
     s.nbk.nbnum=2;          % n of the n-back
-    s.nbk.nprobe=5;         % how many probes 
+    s.nbk.nprobe=5;         % how many probes
     s.nbk.pureBlkNprobe= ceil(s.events.nPureBlk/4); % how many probes for single block, 25%
     s.nbk.minConsProbe=  1; % least amount of consecutive probes
     s.nbk.maxConsProbe=  1; % most amount of consecutive probes
@@ -210,7 +231,7 @@ function setting=getSettings(varargin)
     % WF20150224 - cue to .5 now 2 sec ITI mu
     % WF20150224 -  pure blocks will be off by .3 secs * 30 (ntrials)
     %               but we add 12 secs of ITI at the end
-    %               so efficiency should be okay still ? 
+    %               so efficiency should be okay still ?
     s.time.ITI.mu = mean([s.time.Nback.wait;
                          s.time.Interfere.wait;
                          s.time.Congruent.wait]) ...

@@ -1,0 +1,1 @@
+"C:\Program Files\GNU Octave\Octave-7.3.0\octave-launch.exe" "--persist" "--eval" "cd('C:\Users\localadmin\Desktop\nBMSI'); switchtask"
