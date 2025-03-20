@@ -51,7 +51,10 @@ def gen_inf(crct_response, ncng):
     all_resp = {1,2,3}
     distract = [random.sample(list(all_resp-set([r])),1)[0]
                         for r in crct_response]
-    distrat = random_until(distract, len(distract), 3)
+
+    # DONT randomize these! they're matched to correct response
+    # if too many repeat, would need to redo the sampling
+    # distrat = random_until(distract, len(distract), 3)
 
     return [disp_inf_txt(r, d, p)
             for r, d, p in zip(crct_response, distract, pos)]
