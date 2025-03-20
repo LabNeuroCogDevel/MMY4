@@ -47,7 +47,7 @@ class NBMSI(lncdtask.LNCDTask):
     cue_color = {'nbk': 'blue', 'inf': 'red', 'cng': 'green'}
 
 
-    #: triggers - based on disp_seq or iti or cue. NB 128 = start; 129 = stop
+    #: value sent to EEG recording based on disp_seq or iti or cue. NB 128 = start; 129 = stop
     trigger_look = {
             'iti': 10,
             'cue': 50,
@@ -80,6 +80,11 @@ class NBMSI(lncdtask.LNCDTask):
             }
 
 
+    def send_ttl(self, key):
+        val = trigger_lookup.get(key,250)
+        if self.DEBUG:
+            print(f"sending {val}")
+        self.mark_external(val)
 
 
     def __init__(self, *karg, **kargs):
