@@ -10,12 +10,76 @@ from psychopy import visual, event, core
 from lncdtask import lncdtask
 from lncdtask.externalcom import ExternalCom, FileLogger, ParallelPortEEG
 from typing import Optional
-import time
+import itertools
 
-#: these functions used to build onset_df in generate_timing
-def gen_flankters(btype='cng', crct_response=[1,1,2,3,3,1]):
+def disp_cng_txt(rsp: int) -> str:
+    """
+    generate congruent text based on correct response key
+    :param rsp: response 1 to 3
+    :return: string rep like '1 0 0'
+    >>> disp_cng_txt(2)
+    '0 2 0'
+    """
+    dispvec = [0,0,0]
+    dispvec[rsp-1] = rsp
+    return " ".join([str(x) for x in dispvec])
+
+def disp_inf_txt(rsp: int, distract: int, pos: int) -> str:
+    """
+    generate incongruent/interference text
+    :param rsp: response 1 to 3
+    :param distrcat: repeated number to distract participant
+    :param pos: offset for odd-one-out. 0 is semi-congruent
+    :return: string rep like '2 1 2'
+    >>> disp_inf_txt(2,1,1)
+    '1 1 2'
+    >>> disp_inf_txt(3,2,0)
+    '2 2 3'
+    """
+    dispvec = [distract]*3
+    dispvec[(rsp-1+pos)%3] = rsp
+    return " ".join([str(x) for x in dispvec])
+
+
+def gen_inf(crct_response, ncng):
+    n = len(crct_response)-ncng
+    pos = [1,2]*(n//2+1)
+    pos = pos[:n] + [0]*ncng
+    # doesn't really matter if shift is repeated?
+    pos = random_until(pos, len(pos), 3)
+
+    all_resp = {1,2,3}
+    distract = [random.sample(list(all_resp-set([r])),1)[0]
+                        for r in crct_response]
+    distrat = random_until(distract, len(distract), 3)
+
+    return [disp_inf_txt(r, d, p)
+            for r, d, p in zip(crct_response, distract, pos)]
+
+def gen_flankters(btype='cng', crct_response=[1,3,2,1], ncng=4, nblock=1):
+    """
+    :param ncng : number of congruent-ish trials '2 2 3' in inf block PER BLOCK
+    :param nblock: how many blocks (inf + cng = 2)
+    """
     # if 1: 1 0 0 for cng
-    pass
+    if btype == 'cng':
+        return [disp_cng_txt(rsp) for rsp in crct_response]
+    elif btype == 'inf':
+        return gen_inf(crct_response, ncng)
+    elif btype == 'mix':
+        blen = crct_response//nblock # extras go into last block
+        if nblock%2 != 0:
+            raise Exception(f"Need an even number of blocks, got  {nblocks}")
+        if blen*nblock != len(crct_response):
+            raise Exception(f"number of trials {len(crct_response)} does not evenly fit into {nblock} blocks")
+
+        disp_seqs = [[disp_cng_txt(rsp) for rsp in crct_response[blen*(i-1):blen//2]] +
+          gen_inf(crct_response[(blen*(i-1)+blen//2):blen], ncng)
+            for i in range(nblock//2)]
+        return(itertools.chain(*disp_seqs))
+    else:
+        raise Exception(f"Do not know how to made sequences for {btype}")
+
 
 def max_rep(vec:list) -> int:
     """
@@ -33,6 +97,26 @@ def max_rep(vec:list) -> int:
     # diff of those indices is how many repeats were between a changing value
     return int(np.max(np.diff(idx)))
 
+
+def random_until(vec, n, max_rep_allowed):
+    """
+    shuffle until max rep criteria is met
+    :param vec: input vector (maybe oversampled)
+    :param n: final size of output
+    :param max_rep_allowed: how many reps we can see
+    :return: shuffled vec with out too many repeats
+    """
+    n_reps = max_rep_allowed + 1
+    (i, max_iter) = (0, 1000)
+    while n_reps > max_rep_allowed:
+        random.shuffle(vec)
+        resps = vec[:n] # truncate if we have too many
+        n_reps = max_rep(resps)
+        i = i + 1
+        if i > max_iter:
+            raise Exception(f"failed to converge generating random correct responses w/ fewer than {max_rep_allowed} repeats")
+
+    return resps
 
 def gen_crct_response(n=35, max_rep_allowed=3) -> list[int]:
     """
@@ -53,16 +137,7 @@ def gen_crct_response(n=35, max_rep_allowed=3) -> list[int]:
     oversized = resp_options * int(np.ceil( n/len(resp_options)))
 
     # make sure we dont have too many repeats
-    n_reps = max_rep_allowed + 1
-    (i, max_iter) = (0, 1000)
-    while n_reps > max_rep_allowed:
-        random.shuffle(oversized)
-        resps = oversized[:n] # truncate if we have too many
-        n_reps = max_rep(resps)
-        i = i + 1
-        if i > max_iter:
-            raise Exception(f"failed to converge generating random correct responses w/ fewer than {max_rep_allowed} repeats")
-
+    resps = random_until(oversized, n, max_rep_allowed)
     return resps
 
 
@@ -92,6 +167,8 @@ class NBMSI(lncdtask.LNCDTask):
     #: number of miniblocks, number of switch envets = nminblocks -1 (7 total)
     nMiniBlock = 8
 
+    #: how many of the same correct key can be in a row?
+    max_rep_disp = 3
 
     #: cue type to color lookup
     cue_color = {'nbk': 'blue',
@@ -104,7 +181,9 @@ class NBMSI(lncdtask.LNCDTask):
             'key 2': 2,
             'key 3': 3,
             'iti': 10,
-            'cue': 50,
+            'cue': 50, # shouldn't be seen
+            'cue cng': 51,
+            'cue inf': 52,
             # congruent
             '1 0 0': 101,
             '0 2 0': 102,
@@ -182,13 +261,16 @@ class NBMSI(lncdtask.LNCDTask):
                            will be black if given wrong type
         """
         self.trialnum = self.trialnum + 1
+        self.msgbox.height = .25 # 25% of screen
         self.cue_fix.color = self.cue_color.get(trial_type,'black')
         self.cue_fix.draw()
-        return {**self.flip_at(onset, 'cue') , 'trial': self.trialnum}
+        return {**self.flip_at(onset, 'cue', trial_type) , 'trial': self.trialnum}
 
     def iti(self, onset=0):
         """ white fixation cross between trials
         :param onset: time to flip"""
+
+        self.msgbox.height = .25 # 25% of screen
         self.cue_fix.color = 'white'
         self.cue_fix.draw()
         return(self.flip_at(onset, 'iti'))
@@ -219,6 +301,10 @@ class NBMSI(lncdtask.LNCDTask):
         else:
             raise Exception("Unknown response_from type {self.response_from}")
 
+        # no rt!
+        if pushed is None or len(pushed) == 0:
+            pushed = [None]
+
         self.externals.event(f"key {pushed[0]}")
         rt = push_time - onset
         #self.update_dur()
@@ -228,8 +314,22 @@ class NBMSI(lncdtask.LNCDTask):
                 'pushed': pushed,
                 'push_time': push_time}
 
+    def gen_trial(self, btype, crct, disp_seq):
+        """
+        trial events: iti, cue, seq
+        """
+        return [
+            {'trial_type': btype, 'event_name': 'iti',
+             'dur': self.iti_times['mu'],
+             'crct': 0, 'disp_seq': ''},
+            {'trial_type': btype, 'event_name': 'cue',
+             'dur': self.times[btype]['cue'],
+             'crct': 0, 'disp_seq': ''},
+            {'trial_type': btype, 'event_name': 'seq',
+             'dur': self.times[btype]['wait'],
+             'crct': crct, 'disp_seq': disp_seq}]
     
-    def generate_timing(self, block_type, dur=1.5, max_mix_rep=3):
+    def generate_timing(self, block_type):
         """
         generate timing with catches for rew and neutral
         not implemented, unfinished
@@ -241,15 +341,16 @@ class NBMSI(lncdtask.LNCDTask):
 
         # example one trial
         # columns should match those used by add_event_type above
-        return pd.DataFrame([
-            {'trial_type': 'cng', 'event_name': 'iti',
-             'dur': self.iti_times['mu'], 'crct': 0, 'disp_seq': ''},
-            {'trial_type': 'cng', 'event_name': 'cue',
-             'dur': self.times['cng']['cue'], 'crct': 0, 'disp_seq': ''},
-            {'trial_type': 'cng', 'event_name': 'seq',
-             'dur': self.times['cng']['wait'], 'crct': 1, 'disp_seq': '1 0 0'},
-            {'trial_type': 'cng', 'event_name': 'iti',
-             'dur': self.iti_times['mu'], 'crct': 0, 'disp_seq': ''}])
+        crct_resp = gen_crct_response(n=self.ntrials[block_type],
+                                      max_rep_allowed=self.max_rep_disp)
+        disp_seq = gen_flankters(btype=block_type,crct_response=crct_resp)
+        # TODO: set block type based on 0 in disp text?
+        # if we want to go to nback again, this will be trickier
+
+        events = [self.gen_trial(block_type, c, d)
+                  for c, d in zip(crct_resp, disp_seq)]
+        flattened = itertools.chain(*events)
+        return pd.DataFrame(flattened)
 
         # TODO:
         # generate dataframe with:
