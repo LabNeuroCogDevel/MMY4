@@ -10,7 +10,7 @@ import wx
 from psychopy import visual, event, core, gui
 from lncdtask import lncdtask
 from lncdtask.externalcom import ExternalCom, FileLogger, ParallelPortEEG
-from typing import Optional
+from typing import Optional, Tuple
 import itertools
 import re
 
@@ -218,9 +218,9 @@ class NBMSI(lncdtask.LNCDTask):
 
     #: value sent to EEG recording based on disp_seq or iti or cue. NB 128 = start; 129 = stop
     trigger_lookup = {
-            'key 1': 1,
-            'key 2': 2,
-            'key 3': 3,
+            'key 1': 2, # start at 2 b/c in habit task, 1 is photodiode
+            'key 2': 3,
+            'key 3': 4,
             'iti': 10,
             'cue': 50, # shouldn't be seen
             'cue cng': 51,
@@ -340,9 +340,9 @@ class NBMSI(lncdtask.LNCDTask):
             push_time = core.getTime()
 
         elif self.response_from == 'buttonbox':
-            print("TODO: IMPLEMENT!")
-            pushed = [0]
-            push_time = core.getTime()
+            # TODO: check!
+            (pushed, push_time) = nbmsi.buttonbox.wait()
+            pushed = [pushed] # match keyboard where multiple possible
         else:
             raise Exception("Unknown response_from type {self.response_from}")
 
@@ -530,6 +530,10 @@ def run_block(participant, run_info):
     nbmsi.gobal_quit_key()  # escape quits
     nbmsi.DEBUG = True # not used (yet? 20250317)
 
+    if run_info.info['ButtonBox']:
+        nbmsi.response_from = 'buttonbox'
+        nbmsi.buttonbox = Cedrus()
+
     # read_file_func goes through specified files
     # or defaults to original eprime task list
     onset_df = nbmsi.generate_timing(run_info.info['block'])
@@ -620,40 +624,21 @@ def run_nbmsi(parsed):
 class Cedrus():
     """ cedrus response box (RB-x40)
     top 3 right buttons are 5, 6, 7 (0-2 left, 3,4 thumb 5-7 right)"""
-    def __init__(self, hw, kb):
+    def __init__(self):
         import pyxid2
         self.dev = pyxid2.get_xid_devices()[0]
+
+        self.resp_to_key = {5: '1', #: left button(5) is keyboard '1' (idx)
+                            6: '2', #: up (5) is keyboard '2' (mdl)
+                            7: '3'  #: right (7) is keyboard '3' (ring)
+                            } # 4 is down, not mapped to keyboard
         self.dev.reset_base_timer()
         self.dev.reset_rt_timer()
-        self.resp_to_key = {5: Key.left, 6: Key.up, 7: Key.right, 4: Key.down}
-        self.light_ttl = 1
-        self.resp_to_ttl = {5: 2, 6: 3, 7: 4}
         # <XidDevice "Cedrus RB-840">
 
-    def trigger(self, response):
-        """ todo response number to ttl value translation
-        port 0 is button box
-        port 2 is photodiode/light sensor. always release. only when bright from dark
-        """
-        # {'port': 0, 'key': 7, 'pressed': True, 'time': 13594}
-        # {'port': 2, 'key': 3, 'pressed': True, 'time': 3880}
 
-        if response['pressed']:
-            if response['port'] == 2:
-                self.hw.send(self.light_ttl)
-            if self.kb and response['port'] == 0:
-                rk = response.get("key")
-                ttl = self.resp_to_ttl.get(rk)
-                key = self.resp_to_key.get(rk)
-                if ttl:
-                    self.hw.send(ttl)
-                if key:
-                    self.kb.push(key)
-                print(f"pushed ttl: {ttl}; key: {key}; resp: {response}")
-                sys.stdout.flush()
-
-    def wait(self, max_dur=1.5) -> Optional[int]:
-        resp = None
+    def wait(self, max_dur=1.5) -> Tuple[str, float]:
+        resp = '0'
         ctime = 0
         start_time = core.getTime()
         while True:
@@ -664,8 +649,14 @@ class Cedrus():
                 self.dev.poll_for_response()
                 sleep(.0001)
             else:
-                resp = self.dev.get_next_response()
-                break
+                # only accept valid responses
+                resp_raw = self.dev.get_next_response()
+                resp = self.resp_to_key.get(resp_raw)
+                if resp:
+                    break
+                else:
+                    print(f"BAD Buttonbox key press?! {resp_raw}")
+
         return (resp, ctime)
 
 
