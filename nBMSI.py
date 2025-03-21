@@ -293,7 +293,10 @@ class NBMSI(lncdtask.LNCDTask):
         self.add_event_type('seq', self.seq, ['onset','trial_type', 'disp_seq', 'crct'])
         self.add_event_type('iti', self.iti, ['onset'])
 
-    # -- drawing functions
+        # image to show for instructions. will update in insructions
+        self.instructionpng = visual.ImageStim(self.win, name="instruct", interpolate=True, image='img/fingers.png')
+
+    ## -- drawing/event functions
     def cue(self, onset=0, trial_type='MIA'):
         """ display fixation cross cue
         :param onset: time to show. unix epoc seconds. 0 = immediately
@@ -355,6 +358,7 @@ class NBMSI(lncdtask.LNCDTask):
                 'pushed': pushed,
                 'push_time': push_time}
 
+    ## -- event/timing setup
     def gen_iti(self) -> dict:
         """
         inter trial interval settings
@@ -404,15 +408,101 @@ class NBMSI(lncdtask.LNCDTask):
         flattened = list(itertools.chain(*events)) + [self.gen_iti()]
         return pd.DataFrame(flattened)
 
-        # TODO:
-        # generate dataframe with:
-        #  1. pseudo randomized  correct response per trial
-        #     not too many repeates (<=3?)
-        #  2. flanking distacors: 1 0 0
-        #     inf for 2 could be: 1 2 1, 3 2 3; 2 3 3; 1 1 2; 3 3 2; 2 1 1
-        #     TODO: in mablat, do we canre about congruent ish version
-        #     TODO: random disit flankings
+    ## -- instructions
+    def inst_welcome(self):
+        self.msgbox.text = "Welcome to the LNCD switch task"
+        self.msgbox.draw()
+    def inst_keys(self):
+        self.msgbox.text = "Your fingers correspond to numbers"
+        self.msgbox.pos=(0, -.8)
+        self.msgbox.draw()
+        self.instructionpng.image = 'img/fingers.png'
+        self.instructionpng.draw()
+    def inst_goal(self):
+      self.msgbox.text = 'In this game, you will see sets of 3 numbers.' + \
+          '\n\nOne of the numbers will be different.' + \
+          '\n\nAlways push the button for the DIFFERENT number.'
+      self.msgbox.draw()
+    def inst_inf(self):
+        self.msgbox.pos = (-.25,0)
+        self.msgbox.alignText = 'left'
+        self.msgbox.setHorzJust = 'right'
+        self.msgbox.text = \
+            'This time, we are going to try to trick you with the RED cross.' +\
+            'When the screen of numbers comes up after a RED cross,'+\
+            '\n\n you will still push the button matching the different number.' +\
+            '\n\nBut, make sure you are pushing the button matching the different number, NOT the location on the screen!'
+        self.instructionpng.image ='img/interf.png'
+        self.instructionpng.pos = (.5,0)
+        self.msgbox.draw()
+        self.instructionpng.draw()
+    def inst_cng(self):
 
+        self.msgbox.pos = (-.25,0)
+        self.msgbox.text =\
+            'First, you will practice the green cross trials\n\n' + \
+            'Here, when the screen of numbers comes up after a GREEN cross,\n\n' + \
+            'push the button that matches the different number.'
+        self.instructionpng.image = 'img/congr.png'
+        self.instructionpng.pos = (.5,0)
+        self.msgbox.draw()
+        self.instructionpng.draw()
+
+    def inst_cng(self):
+
+        self.msgbox.pos = (-.25,0)
+        self.msgbox.text =\
+            'First, you will practice the green cross trials\n\n' + \
+            'Here, when the screen of numbers comes up after a GREEN cross,\n\n' + \
+            'push the button that matches the different number.'
+        self.instructionpng.image = 'img/congr.png'
+        self.instructionpng.pos = (.5,0)
+        self.msgbox.draw()
+        self.instructionpng.draw()
+    def inst_mix(self):
+        self.msgbox.pos = (0,-.8)
+        self.msgbox.text = 'This time you will see both GREEN and RED cues'
+        self.msgbox.draw()
+        self.instructionpng.image = 'img/instruct_cog_inf_only.png'
+        self.instructionpng.draw()
+
+
+    def instructions(self, run_num=1, block_type='mix'):
+        """
+        create and run through instruction slices.
+        Use images from img/
+        :param run_num: if first will show welcome slide
+        :param block_type: cng, inf, and mix have different slides
+        """
+        slides = []
+        if run_num == 1:
+            slides.append(self.inst_welcome)
+
+        slides.extend([self.inst_keys, self.inst_goal])
+
+        if block_type == 'cng':
+            slides.append(self.inst_cng)
+        elif block_type == 'inf':
+            slides.append(self.inst_inf)
+        elif block_type == 'mix':
+            slides.append(self.inst_mix)
+
+        i=0
+        while i < len(slides):
+            if i < 0:
+                i=0
+            slides[i]()
+            self.win.flip()
+            core.wait(.3) # so we dont hammer the instructions
+            # undo any text positoin changes
+            self.msgbox.pos = (0,0)
+            self.msgbox.alignText = 'center'
+            self.msgbox.setHorzJust = 'center'
+            keys = event.waitKeys()
+            if 'up' in keys or 'left' in keys:
+                i = i - 1
+            else:
+                i = i + 1
 
 def parse_args(argv):
     import argparse
@@ -465,6 +555,8 @@ def run_block(participant, run_info):
 
     # RUN
     #nbmsi.get_ready(triggers=triggers)
+    nbmsi.instructions(run_num, run_info.info['block'])
+    lncdtask.wait_for_scanner(nbmsi.msgbox, trigger=None, msg="Ready? (Esc to quit)")
     nbmsi.run(end_wait=1)
     nbmsi.all_results().to_csv(participant.run_path(f"onsets_{run_num:02d}"))
     return nbmsi
