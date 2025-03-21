@@ -218,6 +218,9 @@ class NBMSI(lncdtask.LNCDTask):
 
     #: value sent to EEG recording based on disp_seq or iti or cue. NB 128 = start; 129 = stop
     trigger_lookup = {
+            # event.send(128) happens in run code. allow for that here
+            'start': 128, 128: 128,
+            'stop': 129, 129: 129,
             'key 1': 2, # start at 2 b/c in habit task, 1 is photodiode
             'key 2': 3,
             'key 3': 4,
@@ -333,7 +336,11 @@ class NBMSI(lncdtask.LNCDTask):
         self.msgbox.pos=(0,0)
         self.msgbox.draw()
         seq_flip = self.flip_at(onset, disp_seq)
-        # TODO: score trial
+
+        # keyboard will never have a buttonbox time
+        # also set to None for no response
+        bbtime = None 
+
         if self.response_from == 'keyboard':
             pushed = event.waitKeys(keyList=['1','2','3'],
                                 maxWait=self.times[trial_type]['wait'])
@@ -341,22 +348,31 @@ class NBMSI(lncdtask.LNCDTask):
 
         elif self.response_from == 'buttonbox':
             # TODO: check!
-            (pushed, push_time) = nbmsi.buttonbox.wait()
+            (pushed, push_time, bbtime) = self.buttonbox.wait(self.times[trial_type]['wait'])
             pushed = [pushed] # match keyboard where multiple possible
         else:
             raise Exception("Unknown response_from type {self.response_from}")
 
         # no rt!
         if pushed is None or len(pushed) == 0:
+        # default for no rt, no push. bbtime
             pushed = [None]
 
         self.externals.event(f"key {pushed[0]}")
         rt = push_time - onset
-        #self.update_dur()
+
+        # want next slide to launch immedetly 
+        # so set duration of this current event to exactly now (RT)
+        # on next iteration psychopy will be a few ms behind and launch iti right away
         self.onset_df.loc[self.event_number, 'dur'] = rt
+
+        # TODO: score trial? nice to have for results.
+        # but not needed and might slow down screen flip
+
         return {'flip': seq_flip['flip'],
                 'rt': rt,
                 'pushed': pushed,
+                'bbtime': bbtime,
                 'push_time': push_time}
 
     ## -- event/timing setup
@@ -548,7 +564,7 @@ def run_block(participant, run_info):
     if run_info.info['LPTport']:
         lpt = ParallelPortEEG(pp_address=run_info.info['LPTport'], lookup_func=nbmsi.ltp_lookup)
         # this goes first! most import timing is right for this
-        nbmsi.externals.insert(0, lpt)
+        nbmsi.externals.prepend(lpt)
 
 
     # added after lpt
@@ -580,7 +596,7 @@ def run_nbmsi(parsed):
         extra_dict={
             'type': ['green','red','mix',],
             'fullscreen': True,
-            'ButtonBox': False, # TODO: update default to True
+            'ButtonBox': True,
             'LPTport': "53264"},
         order=['subjid', 'run_num', 'timepoint',
                'type',
@@ -637,27 +653,42 @@ class Cedrus():
         # <XidDevice "Cedrus RB-840">
 
 
-    def wait(self, max_dur=1.5) -> Tuple[str, float]:
+    def wait(self, max_dur=1.5) -> Tuple[str, float, float]:
+        """
+        :param max_dur: max wait time
+        :return: keyboard like keypush ('1','2','3'),
+                 core time,
+                 RT buttonbox time
+        """
         resp = '0'
         ctime = 0
+        bbtime = 0
         start_time = core.getTime()
+
+        # clear any hold overs. without this, every other trial has prev response
+        # from https://github.com/cedrus-opensource/pyxid/blob/master/sample/responses.py
+        self.dev.clear_response_queue()
+        self.dev.flush_serial_buffer()
+
         while True:
             ctime = core.getTime()
             if ctime - start_time >= max_dur:
                 break
             if not self.dev.has_response():
                 self.dev.poll_for_response()
-                sleep(.0001)
+                core.wait(.0001)
             else:
                 # only accept valid responses
                 resp_raw = self.dev.get_next_response()
-                resp = self.resp_to_key.get(resp_raw)
+                #  {'port': 0, 'key': 5, 'pressed': True, 'time': 667489}
+                resp = self.resp_to_key.get(resp_raw.get("key"))
+                bbtime = resp_raw.get("time")
                 if resp:
                     break
                 else:
                     print(f"BAD Buttonbox key press?! {resp_raw}")
 
-        return (resp, ctime)
+        return (resp, ctime, bbtime)
 
 
 def main():

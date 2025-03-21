@@ -168,3 +168,15 @@ iti=zeros(s.events.nTrlNoNbk+1,100); for i = 1:length(iti), iti(:,i) = genITI(s.
 max(abs(sum(iti) - s.time.ITI.mu*(s.events.nTrlNoNbk+1)))
     0.0091
 ```
+
+## Psychopy
+### Loef EEG
+2025-03-21 installed newest psychopy (2024.2.4) into psychopy3 and got newest `lncdtask`
+```
+git clone git@github.com:LabNeuroCogDevel/lncdtask.git
+cd lncdtask
+/c/Program\ Files/PsychoPy3/python.exe -m pip install -e .
+# cf old python install
+# /c/Program\ Files/PsychoPy/python.exe --version # 3.8
+# cat /c/Program\ Files/PsychoPy/CHANGELOG.txt # PsychoPy 2022.1
+```
