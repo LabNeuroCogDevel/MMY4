@@ -29,3 +29,5 @@ DownloadPsychtoolbox.m:
 	wget https://raw.github.com/Psychtoolbox-3/Psychtoolbox-3/master/Psychtoolbox/DownloadPsychtoolbox.m.zip
 	unzip DownloadPsychtoolbox.m.zip
 	rm DownloadPsychtoolbox.m.zip
+lncdtask/:
+	git clone git@github.com:LabNeuroCogDevel/lncdtask.git

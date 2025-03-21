@@ -7,3 +7,5 @@ private/genEventMixed.m
 private/genMiniBlockLengths.m
 private/genMixEvents.m
 *.asv
+# from git clone git@github.com:LabNeuroCogDevel/lncdtask.git
+lncdtask/

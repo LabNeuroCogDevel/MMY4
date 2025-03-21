@@ -17,8 +17,8 @@ function  tcOnset = sendCode(code,varargin)
    % replaces isempty(address) check. TODO(20250117): consolidate the two
    if isfield(h,'address')
       address = h.address;
+      addpath('C:\toolboxes\io64'); % both parPulse and outp in this dir
       if ~isEEG
-        addpath('C:\toolboxes\io64');
         config_io;
         outp(address,0);
        else
@@ -36,16 +36,14 @@ function  tcOnset = sendCode(code,varargin)
  if(isempty(address))
      %DIOHANDLE=digitalio('parallel','lpt1');
      %addline(DIOHANDLE,0:7,0,'out');
-     % 2025-02-28 - windoes eeg is 0xD000 defined in getSettings
+     % 2025-02-28 - windows eeg is 0xD000 defined in getSettings
+     % 2025-03-10 - this is dead code? if address not set by host, dont use?
+     error('No parallel port address defined by getSettings. cannot use LPT');
      address=888;
      addpath('C:\toolboxes\io64');
      config_io;
      outp(address,0);
  end
-
- % write the trigger code out
- fprintf('\t%d trigger\n',code);
- %putvalue(DIOHANDLE,code);
 
  % Win EGG on octave using parPulse. handles setting to 0
  if isEEG
@@ -76,6 +74,10 @@ function  tcOnset = sendCode(code,varargin)
   %putvalue(DIOHANDLE,0);
   outp(address,0);
  end
+
+ % write the trigger code out (20250310 AFTER we actually send it)
+ fprintf('\t%d trigger\n',code);
+ %putvalue(DIOHANDLE,code);
 
 end
 

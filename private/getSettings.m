@@ -67,7 +67,8 @@ function setting=getSettings(varargin)
       try
         fprintf('# openning button box\n');
         CedrusResponseBox('CloseAll');
-        s.host.buttonbox = CedrusResponseBox('Open', 'COM5')
+        s.host.buttonbox = CedrusResponseBox('Open', 'COM5');
+        fprintf('# Cedrus box on fid %d', s.host.buttonbox);
       catch e
         disp(e)
         fprintf('!!!ERROR ERROR ERROR\n !!!button box not connected?!\ncontinue with keybord?')
