@@ -6,7 +6,8 @@ port of matlab code for EEG in Luna SPA study (20250310)
 import pandas as pd
 import numpy as np
 import random
-from psychopy import visual, event, core
+import wx
+from psychopy import visual, event, core, gui
 from lncdtask import lncdtask
 from lncdtask.externalcom import ExternalCom, FileLogger, ParallelPortEEG
 from typing import Optional
@@ -525,7 +526,6 @@ def run_block(participant, run_info):
     run_num = run_info.run_num()
 
     win = lncdtask.create_window(run_info.info['fullscreen'])
-    # TODO: add lpt
     nbmsi = NBMSI(win=win, externals=[printer])
     nbmsi.gobal_quit_key()  # escape quits
     nbmsi.DEBUG = True # not used (yet? 20250317)
@@ -547,49 +547,73 @@ def run_block(participant, run_info):
         nbmsi.externals.insert(0, lpt)
 
 
-    # added after eyetracker
+    # added after lpt
     # timing more important to eyetracker than log file
     logger.new(participant.log_path(run_id))
     nbmsi.externals.append(logger)
 
 
     # RUN
-    #nbmsi.get_ready(triggers=triggers)
     nbmsi.instructions(run_num, run_info.info['block'])
     lncdtask.wait_for_scanner(nbmsi.msgbox, trigger=None, msg="Ready? (Esc to quit)")
     nbmsi.run(end_wait=1)
     nbmsi.all_results().to_csv(participant.run_path(f"onsets_{run_num:02d}"))
-    return nbmsi
+
+
+    nbmsi.msgbox.height = .1 # 10% of screen. reset after seq()
+    nbmsi.msg(f"Finished run {run_info.run_num()}!")
+    nbmsi.win.close()
 
 
 def run_nbmsi(parsed):
     """
     run all blocks of nbmsi with gui popup between blocks
     """
-    triggers = None
     participant = None
-    n_runs = 4
-    run_info = lncdtask.RunDialog(extra_dict={'block': ['cng','inf','mix'],
-                                     'fullscreen': True,
-                                     'ButtonBox': False, # TODO: update default to True
-                                     'LPTport': "53264"},
-                         order=['subjid', 'run_num', 'timepoint',
-                                 'block',
-                                'fullscreen', 'ButtonBox', 'LPTport'])
+    #: RA facing names are friendlier than task names
+    block_lookup = {'green': 'cng', 'red': 'inf', 'mix': 'mix'}
+    run_info = lncdtask.RunDialog(
+        extra_dict={
+            'type': ['green','red','mix',],
+            'fullscreen': True,
+            'ButtonBox': False, # TODO: update default to True
+            'LPTport': "53264"},
+        order=['subjid', 'run_num', 'timepoint',
+               'type',
+               'fullscreen', 'ButtonBox', 'LPTport'])
 
     # open a dialog and then a psychopy window for each run
-    while run_info.run_num() <= n_runs:
+    while True: # run_info.run_num() <= n_runs:
         if not run_info.dlg_ok():
             break
+        block = block_lookup.get(run_info.info['type'])
+        if block is None:
+            error_msg = f"cannot run type '{run_info.info['type']}', expect 'green', 'red', or 'mix'"
+            app = wx.App()
+            wx.MessageBox(error_msg, 'Info', wx.OK | wx.ICON_INFORMATION)
+            continue
+
+        # add code name for block to run info
+        run_info.info['block'] = block
         # update participant (logging info)
         if run_info.has_changed('subjid') or participant is None:
             participant = run_info.mk_participant(['switch'])
+
         nbmsi = run_block(participant, run_info)
 
-        nbmsi.msgbox.height = .1 # 10% of screen. reset after seq()
-        nbmsi.msg(f"Finished run {run_info.run_num()}/{n_runs}!")
-        nbmsi.win.close()
-            
+        # remove block so it's not in the next dialog
+        # RA sees and sets friendlier 'type'
+        del run_info.info['block']
+
+        # switch green<->red for second block
+        # go to mix after second block
+        run_info.info['run_num'] += 1
+        if run_info.info['run_num'] <= 2:
+            run_info.info['type'] = \
+                'green' if run_info.info['type']=='red'  else 'red'
+        else:
+           run_info.info['type'] = 'mix'
+
 
 
 
