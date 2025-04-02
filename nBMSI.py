@@ -3,6 +3,8 @@
 NBMSI - n-Back Multi-Source Interference
 port of matlab code for EEG in Luna SPA study (20250310)
 """
+import itertools
+import re
 import pandas as pd
 import numpy as np
 import random
@@ -11,8 +13,7 @@ from psychopy import visual, event, core, gui
 from lncdtask import lncdtask
 from lncdtask.externalcom import ExternalCom, FileLogger, ParallelPortEEG
 from typing import Optional, Tuple
-import itertools
-import re
+
 
 def disp_cng_txt(rsp: int) -> str:
     """
@@ -25,6 +26,7 @@ def disp_cng_txt(rsp: int) -> str:
     dispvec = [0,0,0]
     dispvec[rsp-1] = rsp
     return " ".join([str(x) for x in dispvec])
+
 
 def disp_inf_txt(rsp: int, distract: int, pos: int) -> str:
     """
@@ -39,7 +41,7 @@ def disp_inf_txt(rsp: int, distract: int, pos: int) -> str:
     '2 2 3'
     """
     dispvec = [distract]*3
-    dispvec[(rsp-1+pos)%3] = rsp
+    dispvec[(rsp-1+pos) % 3] = rsp
     return " ".join([str(x) for x in dispvec])
 
 
@@ -49,6 +51,8 @@ def gen_inf(crct_response, ncng) -> list[str]:
     :param crct_response: ideal responses [1,2,3,...]
     :param ncng: how many should be semi congruent
                  position matches odd-one-out (e.g. '1 2 1')
+                 if None, equally distributed
+                 2025-04-02: 0 == never seen for inf and mix
     :return: list of display strings ['1 1 2' '3 2 2']
     """
     # take out ncg, know positoin for those will be 0
@@ -57,34 +61,73 @@ def gen_inf(crct_response, ncng) -> list[str]:
     # '1' shifted by 1 gets places in 2nd slot: 'x 1 x'
     # '1' shifted by 2 to 3rd: 'x x 1'
     # '2' shifted by 2 (modulus 3) to 1st: '2 x x'
-    pos = [1,2]*(n//2+1)
+    pos = [1, 2]*(n//2+1)
     pos = pos[:n] + [0]*ncng
+    # if we want to include ncng equally ('1 2 1' just as often as '2 1 1')
+    if ncng is None:
+        n = len(crct_response)
+        pos = [0, 1, 2]*(n//3 + 1)
+
     # doesn't really matter if shift is repeated?
-    pos = random_until(pos, len(pos), 3)
+    # but this will "fairly" truncate if not easily divisile by 3
+    pos = random_until(pos, len(crct_response), 3)
 
     # distracting non-odd-one-out can be either of the not target numbers
     # we'll just randomly select
-    all_resp = {1,2,3}
-    distract = [random.sample(list(all_resp-set([r])),1)[0]
-                        for r in crct_response]
-
-    # DONT randomize these! they're matched to correct response
-    # if too many repeat, would need to redo the sampling
-    # distrat = random_until(distract, len(distract), 3)
-    # TODO: balance? maybe pull from pull instead of always random?
+    all_resp = {1, 2, 3}
+    distract = [random.sample(list(all_resp-set([r])), 1)[0]
+                for r in crct_response]
 
     return [disp_inf_txt(r, d, p)
             for r, d, p in zip(crct_response, distract, pos)]
 
-def gen_flankters(btype='cng', crct_response=[1,3,2,1], ncng=4, nblock=1, cog_first=True):
+
+def gen_trials_per_block(dist, total_trials):
     """
+    shuffle count of trials for each blocks inf or cng block in mix
+    :return: shuffled and balanced block distributin
+    >>> x = gen_trials_per_block([6]*4 + [8]*2 + [10], 100)
+    >>> len(x)  # 14 blocks
+    14
+    >>> x[0]  # always start with block of 6 trials
+    6
+    >>> sum(x)  # have 100 total trials
+    100
+    >>> sum(x[1::2])  # equally distributed between block types
+    50
+    >>> len([nt for nt in x[::2] if nt == 6]) # both should have 4 blocks of 6 trials
+    4
+    """
+
+    # always start with 6
+    # TODO: could always just start with the first element
+    if dist[0] != 6:
+        raise Exception("Expect dist of trials per block to start with 6")
+    b1 = [6] + random_until(dist[1:], total_trials//2, 3)
+    # second can be in any order
+    b2 = random_until(dist, total_trials//2, 3)
+    # interleave and flatten
+    return list(itertools.chain(*zip(b1, b2)))
+
+
+def gen_flankters(btype='cng',
+                  crct_response=[1, 3, 2, 1],
+                  ncng=4,
+                  nblock=1,
+                  cog_first=True,
+                  trials_per_block=None):
+    """
+    :param btype: block type 'cng' or 'inf'
+    :param crct_response: vector of correct responses. matches 
     :param ncng : number of congruent-ish trials '2 2 3' in inf TOTAL (floor division if nblock>1)
     :param nblock: how many blocks (inf + cng = 2)
+    :param cog_first: in mix block, show cog first
+    :param trials_per_block: trials per block. if None len(crct_response)//nblock
     >>> disp = gen_flankters('mix', [1,2,3]*4, ncng=4, nblock=2)
     >>> len(disp)
     12
     >>> disp[0][0]
-    1
+    '1'
     >>> '3' in disp[-1].split(' ')
     True
     """
@@ -94,18 +137,34 @@ def gen_flankters(btype='cng', crct_response=[1,3,2,1], ncng=4, nblock=1, cog_fi
     elif btype == 'inf':
         return gen_inf(crct_response, ncng)
     elif btype == 'mix':
-        blen = len(crct_response)//nblock # extras go into last block
         if nblock%2 != 0:
             raise Exception(f"Need an even number of blocks, got  {nblock}")
-        if blen*nblock != len(crct_response):
-            raise Exception(f"number of trials {len(crct_response)} does not evenly fit into {nblock} blocks")
+        if trials_per_block is None:
+            blen = len(crct_response)//nblock # extras go into last block
+            if blen*nblock != len(crct_response):
+                raise Exception(f"number of trials {len(crct_response)} does not evenly fit into {nblock} blocks")
+        else:
+            if sum(trials_per_block) != len(crct_response):
+                raise Exception(f"total number of trials {sum(trials_per_block)} does not match number of resposnes {len(crct_response)}")
 
         disp_seqs = []
+        resp_idx = 0
         # go 2 blocks at a time
         for i in range(nblock//2):
-            start =  2*i*blen
-            mid   =  start + blen
-            end   =  mid + blen
+
+            # did we manually specify the number of trials in each block?
+            if trials_per_block is None:
+                blen1 = len(crct_response)//nblock
+                blen2 = blen1
+            else:
+                blen1 = trials_per_block[2*i]
+                blen2 = trials_per_block[2*i + 1]
+
+            start =  resp_idx
+            mid   =  start + blen1
+            end   =  mid + blen2
+            resp_idx = end # update where we are overall
+
             resp_1 = crct_response[start:mid]
             resp_2 = crct_response[mid:end]
             if cog_first:
@@ -117,7 +176,7 @@ def gen_flankters(btype='cng', crct_response=[1,3,2,1], ncng=4, nblock=1, cog_fi
                 cog_block = [disp_cng_txt(rsp) for rsp in resp_2]
                 disp_seqs.extend(inf_block + cog_block)
 
-        return(disp_seqs)
+        return disp_seqs
     else:
         raise Exception(f"Do not know how to made sequences for {btype}")
 
@@ -168,7 +227,7 @@ def gen_crct_response(n=35, max_rep_allowed=3) -> list[int]:
     >>> x = gen_crct_response(35,3)
     >>> len(x)
     35
-    >>> max_reps(x) <= 3
+    >>> max_rep(x) <= 3
     True
     """
     resps = []
@@ -197,10 +256,12 @@ class NBMSI(lncdtask.LNCDTask):
 
     #: inter trial interval times for EEG are fixed at .5
     #: originally in matlab for fMRI with variable iti
-    iti_times = {'min': .5, 'mu': .5}
+    iti_times = {'min': 1.5, 'mu': 1.5}
 
     #: number of trials in a given block. TODO(20250317) match ML
-    ntrials = {'mix': 40, 'cng': 35, 'inf': 35}
+    ntrials = {'mix': 100, 'cng': 35, 'inf': 35}
+    #: one set of either inf or cng blocks. double for total (n=100)
+    mix_trials_per_block = [6]*4 + [8]*2 + [10]
 
     #: in interference, how many are also congruent. eg. '1 2 1' (push key in congruent spot) cf. '1 1 2'
     nInfCng = 4
@@ -234,26 +295,26 @@ class NBMSI(lncdtask.LNCDTask):
             '0 0 3': 103,
             # 200 = incogruent/interference
             # 210 = expect 1
-            '1 2 2': 211, # congruent
-            '2 1 2': 212,
+            '1 2 2': 211,  # semi-congruent
+            '2 1 2': 212,  # no interference
             '2 2 1': 213,
-            '1 3 3': 214, # congruent
+            '1 3 3': 214,  # semi-congruent
             '3 1 3': 215,
-            '3 3 1': 216,
+            '3 3 1': 216,  # no interference
             # 220 = expect 2
-            '2 1 1': 221,
-            '1 2 1': 222, # congruent
+            '2 1 1': 221,  # no interference
+            '1 2 1': 222,  # semi-congruent
             '1 1 2': 223,
             '2 3 3': 224,
-            '3 2 3': 225, # congruent
-            '3 3 2': 226,
+            '3 2 3': 225,  # semi-congruent
+            '3 3 2': 226,  # no interference
             # 230 = expect 3
-            '3 1 1': 231,
+            '3 1 1': 231,  # no interference
             '1 3 1': 232,
-            '1 1 3': 233, # congruent
+            '1 1 3': 233,  # semi-congruent
             '3 2 2': 231,
-            '2 3 2': 232,
-            '2 2 3': 233, # congruent
+            '2 3 2': 232,  # no interference
+            '2 2 3': 233,  # semi-congruent
             }
 
     response_from = 'keyboard' #: keyboard or buttonbox
@@ -396,7 +457,7 @@ class NBMSI(lncdtask.LNCDTask):
             {'trial_type': btype, 'event_name': 'seq',
              'dur': self.times[btype]['wait'],
              'crct': crct, 'disp_seq': disp_seq}]
-    
+
     def generate_timing(self, block_type):
         """
         generate timing with catches for rew and neutral
@@ -409,16 +470,25 @@ class NBMSI(lncdtask.LNCDTask):
 
         # example one trial
         # columns should match those used by add_event_type above
-        crct_resp = gen_crct_response(n=self.ntrials[block_type],
+        total_trials = self.ntrials[block_type]
+        crct_resp = gen_crct_response(n=total_trials,
                                       max_rep_allowed=self.max_rep_disp)
-        disp_seq = gen_flankters(btype=block_type,crct_response=crct_resp,
-                                 ncng = self.nInfCng, nblock=self.nMiniBlock,
-                                 cog_first=random.random()>.5)
+
+        tpb = None
+        if block_type == 'mix':
+            tpb = gen_trials_per_block(self.mix_trials_per_block, total_trials)
+
+        disp_seq = gen_flankters(btype=block_type,
+                                 crct_response=crct_resp,
+                                 ncng=self.nInfCng,
+                                 nblock=self.nMiniBlock,
+                                 cog_first=random.random() > .5,
+                                 trials_per_block=tpb)
         # have computing seq component part separately
         # best way to get mix block type is test if is cog:
         #     is cog if '0' in disp text
         # if we want nback again, this will be trickier
-        ttype = ['cng' if re.search('0', x) else 'inf' for x in disp_seq ]
+        ttype = ['cng' if re.search('0', x) else 'inf' for x in disp_seq]
 
         events = [self.gen_trial(t, c, d)
                   for t, c, d in zip(ttype, crct_resp, disp_seq)]
