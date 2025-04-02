@@ -1,0 +1,7 @@
+[project]
+name = "lncd_switch"
+version = "0.2.20250402.1"
+description = "Switch task originally used in MultiModal Year 4"
+readme = "readme.md"
+requires-python = ">=3.12"
+dependencies = ["lncdtask@git+https://github.com/LabNeuroCogDevel/lncdtask"]
