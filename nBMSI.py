@@ -252,11 +252,11 @@ class NBMSI(lncdtask.LNCDTask):
     #: time in seconds for each event (n-back, interference, congruent)
     times = {'nbk': {'cue': .5, 'wait': 1.5},
              'inf': {'cue': .5, 'wait': 1.3},
-             'cng': {'cue': .5, 'wait': 1}}
+             'cng': {'cue': .5, 'wait': 1.3}}
 
     #: inter trial interval times for EEG are fixed at .5
     #: originally in matlab for fMRI with variable iti
-    iti_times = {'min': 1.5, 'mu': 1.5}
+    iti_times = {'min': 1, 'max': 1.5}
 
     #: number of trials in a given block. TODO(20250317) match ML
     ntrials = {'mix': 100, 'cng': 35, 'inf': 35}
@@ -441,8 +441,9 @@ class NBMSI(lncdtask.LNCDTask):
         """
         inter trial interval settings
         """
+        dur = random.uniform(self.iti_times['min'], self.iti_times['max'])
         return {'trial_type': '', 'event_name': 'iti',
-                'dur': self.iti_times['mu'],
+                'dur': dur,
                 'crct': 0, 'disp_seq': ''}
 
     def gen_trial(self, btype, crct, disp_seq):
