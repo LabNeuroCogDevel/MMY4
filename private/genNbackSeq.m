@@ -17,6 +17,7 @@
 %
 function [seq, isprobe, seqi] = genNbackSeq(n,nProbe,back)
   
+  MAX_CORRECT_KEY_REP = 3; % how many times we can the same digit in a row?
 
   % how many back to go doesn't matter if we have no nbacks
   if(n*nProbe*back==0) 
@@ -101,7 +102,9 @@ function [seq, isprobe, seqi] = genNbackSeq(n,nProbe,back)
      % what index of seqs should we use for each nback trial
      nisnback = nnz( ~isprobe);
      distseq  = repmat(1:nseq,1,ceil(nisnback/nseq));
-     seqi(~isprobe)  = Shuffle(distseq(1:nisnback));
+     % 20250417 - update shuffle to max rep 3 in a row
+     %            cog also uses this code. so nisnback could be large
+     seqi(~isprobe)  = shuffle_maxrep(distseq(1:nisnback), MAX_CORRECT_KEY_REP);
 
      nbidx = find(isprobe);
 

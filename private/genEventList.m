@@ -74,7 +74,7 @@ function [e mat] = genEventList(blocktypes)
          nminiblock=events.nminblocks;
          nprobe=0;
 
-         [ttvec,nbk,inf,cng] = genMixed(n,ntrltypes,nminiblock,nprobe,nbnum);
+         [ttvec,nbk,inf,cng] = genMixed(n,types,nminiblock,nprobe,nbnum);
          randIdx=ttvec;
       
       % 20150122 WF - any num>4 is a mix block, nothing is hardcoded
@@ -100,7 +100,8 @@ function [e mat] = genEventList(blocktypes)
          nprobe=0;
 
          fprintf('no nback: genMixed:\n'); disp([n,ntrltypes,nminiblock,nprobe,nbnum]);
-         [ttvec,nbk,inf,cng] = genMixed(n,ntrltypes,nminiblock,nprobe,nbnum);
+
+         [ttvec,nbk,inf,cng] = genMixed(n,types,nminiblock,nprobe,nbnum);
          randIdx=ttvec;
 
       elseif blocktypes == 20
@@ -116,7 +117,7 @@ function [e mat] = genEventList(blocktypes)
          nprobe=0;
 
          fprintf('no nback: genMixed:\n'); disp([n,ntrltypes,nminiblock,nprobe,nbnum]);
-         [ttvec,nbk,inf,cng] = genMixed(n,ntrltypes,nminiblock,nprobe,nbnum);
+         [ttvec,nbk,inf,cng] = genMixed(n,types,nminiblock,nprobe,nbnum);
          randIdx=ttvec;
       else
          error('unknown blocktype %d',blocktypes);

@@ -34,6 +34,7 @@ function t=event_Nback(w,when,maxwait,seq,issamenback)
   t.tcSeqOnset = sendCode(t.tcSeq);
 
   t.onset= seqt.onset;
+  printf("# disp: %d%d%d\n",seq{1},seq{2},seq{3}); % 20250417WF - include sequence in diary
 
   % wait (maxwait seconds) for a valid (keys.finger) response
   % report when the key was pushed, what the rt is (based on onset)

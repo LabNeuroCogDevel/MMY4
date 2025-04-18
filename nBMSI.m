@@ -62,8 +62,8 @@ function nBMSI(subj,blocktype,varargin)
  catch genfailed
      if(~isOctave), cd ..; end
      genfailed,
-     genfailed.stack.file(1),
-     genfailed.stack.line(1),
+     genfailed.stack.file,
+     genfailed.stack.line,
      error('failed to generate a event list')
  end
 
@@ -87,6 +87,7 @@ function nBMSI(subj,blocktype,varargin)
 
     % we start when the scanner sends the go ahead
     starttime = getReady(w,s.host.type);
+    fprintf('start @ %f\n',starttime);
 
     res=cell(1,length(e));
     for ei=1:length(e)

@@ -5,6 +5,7 @@
 %
 %20141217 - initial
 %20150217 - move nbk logic to nbkMatchSettings
+%20250417 - add MAXREPS_ACROSS_SWITCH and loop to force
 %
 % generate a mixed block of N trials
 % with n_etype mini block types
@@ -13,13 +14,15 @@
 %  and we have to recall "nback" numbers 
 %  to correctly respond on a probe
 %
-function [ttvec, nbk,inf,cng] = genMixed(N,n_etype,n_blocks,nprobe,nback)
+function [ttvec, nbk,inf,cng] = genMixed(N,etypes,n_blocks,nprobe,nback)
  %N=120; n_etype=3; n_blocks=24;  
  %nprobe=12; nback=2;
+ n_etype = length(etypes);
  t_trlblk= N/n_etype;   %40: total trials per block
  mu      = N/n_blocks;  %5 : average num trials in each miniblock
  n_mini  = t_trlblk/mu; %8 : number of miniblocks of each type 
                         %6   when no nback
+ MAXREPS_ACROSS_SWITCH = 3;
  fprintf('\n# genMixed: %d total over %d blocks and %d types (%d/type) with %d trials per block\n',...
          N, n_blocks, n_etype, t_trlblk, mu);
 
@@ -49,15 +52,48 @@ function [ttvec, nbk,inf,cng] = genMixed(N,n_etype,n_blocks,nprobe,nback)
  % and 2 if inf
  ttvec = mg_trialTypeVec(v);
 
- %% generate sequences
- [inf.seq, inf.seqi] = ...
-      genInterfereSeq(t_trlblk);
+ NBK_TTi = strmatch('Nback',etypes);
+ INF_TTi = strmatch('Interfere',etypes);
+ CNG_TTi = strmatch('Congruent',etypes);
 
- [cng.seq, junk, cng.seqi ] = ...
-      genNbackSeq(t_trlblk,0,0);
+ % 20250417 - too many in a row!?
+ %   should generate correct responses first (a la py code)
+ %   but current code makes that tricky.
+ %   both genInterfereSeq and genNbackSeq use shuffle_maxrep
+ %   but they dont see each other
+ %   so here's another loop to check
+ %   NB. this makes switch repeats unlikely (rep of 2 + rep of 2)
+ %       so allow 4 in a row if across a switch?
+ maxiterations=1000;
+ i=0;
 
+ while i < maxiterations
 
- nbk = nbkMatchSettings(t_trlblk,nprobe,nback,v);
+    %% generate sequences
+    [inf.seq, inf.seqi] = ...
+        genInterfereSeq(t_trlblk, 0);
+    % 20250417WF - 0 => disable semi-congruent (like '1 2 1')
+
+    [cng.seq, junk, cng.seqi ] = ...
+        genNbackSeq(t_trlblk,0,0);
+
+    nbk = nbkMatchSettings(t_trlblk,nprobe,nback,v);
+
+    % build correct keys
+    all_seq=zeros(1,N);
+    all_seq(ttvec==INF_TTi) = inf.seqi;
+    all_seq(ttvec==CNG_TTi) = cng.seqi;
+    if NBK_TTi,
+        all_seq(ttvec==NBK_TTi) = nbk.seqi;
+    end
+
+    if max_reps_seen(all_seq) <= MAXREPS_ACROSS_SWITCH, break, end
+    i=i+1;
+ end
+
+ if i >= maxiterations
+   error('mix block has too many repeats after 1000 shuffles')
+ end
 
 end
 
