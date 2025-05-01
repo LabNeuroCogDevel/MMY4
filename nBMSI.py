@@ -497,9 +497,35 @@ class NBMSI(lncdtask.LNCDTask):
         return pd.DataFrame(flattened)
 
     ## -- instructions
-    def inst_welcome(self):
+    def inst_welcome(self) -> Optional[bool]:
+        """
+        change screen to welcome message.
+        when using button box, watch for presses and update the screen
+        """
         self.msgbox.text = "Welcome to the LNCD switch task"
         self.msgbox.draw()
+        # give feedback on button box
+        while self.response_from == 'buttonbox':
+            self.win.flip()
+            # keyboard press is RA advancing to next instruction
+            # leave this loop and function entirely.
+            # 'True' so we can skip an extra flip in main instruction loop
+            if event.getKeys():
+                return True
+            # check for button box keys wait, wait and try again
+            if not self.buttonbox.dev.has_response():
+                self.dev.poll_for_response()
+                core.wait(.0001)
+                continue
+            resp_raw = self.buttonbox.dev.get_next_response()
+            resp = self.buttonbox.resp_to_key.get(resp_raw.get("key"))
+            # redraw with new button push
+            self.msgbox.text = "Welcome to the LNCD switch task"
+            self.msgbox.pos = (.5, .8)
+            self.msgbox.text = f"button {resp} ({resp_raw.get('key')})"
+            self.msgbox.draw()
+
+
     def inst_keys(self):
         self.msgbox.text = "Your fingers correspond to numbers"
         self.msgbox.pos=(0, -.8)
