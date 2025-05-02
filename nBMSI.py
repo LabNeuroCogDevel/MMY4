@@ -542,43 +542,40 @@ class NBMSI(lncdtask.LNCDTask):
         self.msgbox.alignText = 'left'
         self.msgbox.setHorzJust = 'right'
         self.msgbox.text = \
-            'This time, we are going to try to trick you with the RED cross.' +\
-            'When the screen of numbers comes up after a RED cross,'+\
-            '\n\n you will still push the button matching the different number.' +\
-            '\n\nBut, make sure you are pushing the button matching the different number, NOT the location on the screen!'
+           'When the screen of numbers comes up after a RED cross,\n' +\
+           ' you will still push the button matching the different number. \n\n' +\
+           'But, make sure you are pushing the button matching the NUMBER that is different,\n' +\
+           'NOT its location on the screen!'
         self.instructionpng.image ='img/interf.png'
         self.instructionpng.pos = (.5,0)
         self.msgbox.draw()
         self.instructionpng.draw()
-    def inst_cng(self):
 
+    def inst_cng(self):
         self.msgbox.pos = (-.25,0)
         self.msgbox.text =\
-            'First, you will practice the green cross trials\n\n' + \
-            'Here, when the screen of numbers comes up after a GREEN cross,\n\n' + \
-            'push the button that matches the different number.'
+        self.msgbox.text =\
+           'Here, when the screen of numbers comes up after a GREEN cross,\n' +\
+           'push the button that matches the LOCATION of the different number.'
         self.instructionpng.image = 'img/congr.png'
-        self.instructionpng.pos = (.5,0)
+        self.instructionpng.pos = (.5,.5)
         self.msgbox.draw()
         self.instructionpng.draw()
 
-    def inst_cng(self):
-
-        self.msgbox.pos = (-.25,0)
-        self.msgbox.text =\
-            'First, you will practice the green cross trials\n\n' + \
-            'Here, when the screen of numbers comes up after a GREEN cross,\n\n' + \
-            'push the button that matches the different number.'
-        self.instructionpng.image = 'img/congr.png'
-        self.instructionpng.pos = (.5,0)
-        self.msgbox.draw()
-        self.instructionpng.draw()
     def inst_mix(self):
-        self.msgbox.pos = (0,-.8)
-        self.msgbox.text = 'This time you will see both GREEN and RED cues'
+        self.msgbox.pos = (-.25,0)
+        self.msgbox.width = .5
+        self.msgbox.text = \
+         'This time you will see both GREEN and RED cues\n\n' +\
+         'When the GREEN cross is shown,\n' +\
+         'press the button matching the LOCATION of the different number\n\n' +\
+         'When the RED cross is shown,\n' +\
+         'press the button matching the NUMBER that is different'
         self.msgbox.draw()
         self.instructionpng.image = 'img/instruct_cog_inf_only.png'
+        self.instructionpng.pos = (.7,.5)
         self.instructionpng.draw()
+        self.instructionpng.pos = (.5,.5)
 
 
     def instructions(self, run_num=1, block_type='mix'):
@@ -592,7 +589,7 @@ class NBMSI(lncdtask.LNCDTask):
         if run_num == 1:
             slides.append(self.inst_welcome)
 
-        slides.extend([self.inst_keys, self.inst_goal])
+        slides.extend([self.inst_keys]) # , self.inst_goal
 
         if block_type == 'cng':
             slides.append(self.inst_cng)
