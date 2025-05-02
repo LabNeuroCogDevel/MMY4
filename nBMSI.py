@@ -504,9 +504,9 @@ class NBMSI(lncdtask.LNCDTask):
         """
         self.msgbox.text = "Welcome to the LNCD switch task"
         self.msgbox.draw()
+        self.win.flip()
         # give feedback on button box
         while self.response_from == 'buttonbox':
-            self.win.flip()
             # keyboard press is RA advancing to next instruction
             # leave this loop and function entirely.
             # 'True' so we can skip an extra flip in main instruction loop
@@ -514,16 +514,19 @@ class NBMSI(lncdtask.LNCDTask):
                 return True
             # check for button box keys wait, wait and try again
             if not self.buttonbox.dev.has_response():
-                self.dev.poll_for_response()
+                self.buttonbox.dev.poll_for_response()
                 core.wait(.0001)
                 continue
             resp_raw = self.buttonbox.dev.get_next_response()
             resp = self.buttonbox.resp_to_key.get(resp_raw.get("key"))
             # redraw with new button push
+            self.msgbox.pos = (0, 0)
             self.msgbox.text = "Welcome to the LNCD switch task"
-            self.msgbox.pos = (.5, .8)
+            self.msgbox.draw()
+            self.msgbox.pos = (.5, -.8)
             self.msgbox.text = f"button {resp} ({resp_raw.get('key')})"
             self.msgbox.draw()
+            self.win.flip()
 
 
     def inst_keys(self):
