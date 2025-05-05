@@ -455,10 +455,17 @@ class NBMSI(lncdtask.LNCDTask):
         """
         trial events: iti, cue, seq
         """
+        # 20250505: ISI can be random. if cue is list assume [min,max]
+        cue_dur = self.times[btype]['cue']
+        if type(cue_dur) is list:
+            a = cue_dur[0]
+            b = cue_dur[-1]
+            cue_dur = (random.random()*(b-a))+a
+
         return [
             self.gen_iti(),
             {'trial_type': btype, 'event_name': 'cue',
-             'dur': self.times[btype]['cue'],
+             'dur': cue_dur,
              'crct': 0, 'disp_seq': ''},
             {'trial_type': btype, 'event_name': 'seq',
              'dur': self.times[btype]['wait'],
@@ -658,6 +665,12 @@ def run_block(participant, run_info):
     nbmsi.times['cng']['wait'] = max_rt
     nbmsi.times['inf']['wait'] = max_rt
 
+    if isi_range := run_info.info.get('isi_range'):
+        isi_range = [float(x) for x in isi_range.split(',')]
+        nbmsi.times['cng']['cue'] = isi_range
+        nbmsi.times['inf']['cue'] = isi_range
+
+
     nbmsi.gobal_quit_key()  # escape quits
     nbmsi.DEBUG = True # not used (yet? 20250317)
 
@@ -714,6 +727,7 @@ def run_nbmsi(parsed):
             'fullscreen': True,
             'ButtonBox': False,
             'max_rt': '1',
+            'isi_range': '.3,.75',
             'LPTport': '' }
 
     nodename = platform.uname().node
@@ -721,6 +735,7 @@ def run_nbmsi(parsed):
     if nodename in ['DESKTOP-I2CP6M6']:
         print(f"is EEG")
         settings['LPTport'] = "53264"
+        settings['isi_range'] = ""
         settings['ButtonBox'] = True
 
     run_info = lncdtask.RunDialog(
