@@ -4,6 +4,7 @@ NBMSI - n-Back Multi-Source Interference
 port of matlab code for EEG in Luna SPA study (20250310)
 """
 import itertools
+import platform
 import re
 import pandas as pd
 import numpy as np
@@ -250,9 +251,13 @@ class NBMSI(lncdtask.LNCDTask):
     """
 
     #: time in seconds for each event (n-back, interference, congruent)
+    #: originally 1.5 for nbck 1.4 for inf and 1.3 for cng
+    #: 20250406 - cng to match inf 1->1.3
+    #: 20250505 - inf=cng=1
+    #:            made sorter to try to bigger spread in performance
     times = {'nbk': {'cue': .5, 'wait': 1.5},
-             'inf': {'cue': .5, 'wait': 1.3},
-             'cng': {'cue': .5, 'wait': 1.3}}
+             'inf': {'cue': .5, 'wait': 1},
+             'cng': {'cue': .5, 'wait': 1}}
 
     #: inter trial interval times for EEG are fixed at .5
     #: originally in matlab for fMRI with variable iti
@@ -527,6 +532,8 @@ class NBMSI(lncdtask.LNCDTask):
             self.msgbox.text = f"button {resp} ({resp_raw.get('key')})"
             self.msgbox.draw()
             self.win.flip()
+        else:
+            return True
 
 
     def inst_keys(self):
@@ -605,13 +612,18 @@ class NBMSI(lncdtask.LNCDTask):
         while i < len(slides):
             if i < 0:
                 i=0
-            slides[i]()
-            self.win.flip()
-            core.wait(.3) # so we dont hammer the instructions
+            disp_already_flipped = slides[i]()
+            if not disp_already_flipped:
+                self.win.flip()
+            # so we dont hammer the instructions with a held key
+            core.wait(.3)
+
             # undo any text positoin changes
             self.msgbox.pos = (0,0)
             self.msgbox.alignText = 'center'
             self.msgbox.setHorzJust = 'center'
+
+            # how to go to the next
             keys = event.waitKeys()
             if 'up' in keys or 'left' in keys:
                 i = i - 1
@@ -640,6 +652,12 @@ def run_block(participant, run_info):
 
     win = lncdtask.create_window(run_info.info['fullscreen'])
     nbmsi = NBMSI(win=win, externals=[printer])
+
+    # 20250505 - set to 1 by default but allow RA/admin to change
+    max_rt = float(run_info.info['max_rt'])
+    nbmsi.times['cng']['wait'] = max_rt
+    nbmsi.times['inf']['wait'] = max_rt
+
     nbmsi.gobal_quit_key()  # escape quits
     nbmsi.DEBUG = True # not used (yet? 20250317)
 
@@ -687,14 +705,26 @@ def run_nbmsi(parsed):
     run all blocks of nbmsi with gui popup between blocks
     """
     participant = None
-    #: RA facing names are friendlier than task names
+    #: RA facing names (color) are friendlier than task names
     block_lookup = {'green': 'cng', 'red': 'inf', 'mix': 'mix'}
-    run_info = lncdtask.RunDialog(
-        extra_dict={
+
+    #: task options can be tweaked. EEG sets BottonBox and LPTport
+    settings = {
             'type': ['green','red','mix',],
             'fullscreen': True,
-            'ButtonBox': True,
-            'LPTport': "53264"},
+            'ButtonBox': False,
+            'max_rt': '1',
+            'LPTport': '' }
+
+    nodename = platform.uname().node
+    print(f"running on {nodename}")
+    if nodename in ['DESKTOP-I2CP6M6']:
+        print(f"is EEG")
+        settings['LPTport'] = "53264"
+        settings['ButtonBox'] = True
+
+    run_info = lncdtask.RunDialog(
+        extra_dict=settings,
         order=['subjid', 'run_num', 'timepoint',
                'type',
                'fullscreen', 'ButtonBox', 'LPTport'])
