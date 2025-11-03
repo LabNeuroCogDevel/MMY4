@@ -733,8 +733,13 @@ def run_nbmsi(parsed):
     nodename = platform.uname().node
     print(f"running on {nodename}")
     if nodename in ['DESKTOP-I2CP6M6']:
-        print(f"is EEG")
+        print(f"is windows EEG")
         settings['LPTport'] = "53264"
+        settings['isi_range'] = ""
+        settings['ButtonBox'] = True
+    elif nodename in ['eegtask']:
+        print(f"is linux EEG")
+        settings['LPTport'] = "/dev/parport0"
         settings['isi_range'] = ""
         settings['ButtonBox'] = True
 
