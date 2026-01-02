@@ -118,8 +118,17 @@ function instructions(w,bn,varargin)
       Screen('Flip',w);
       WaitSecs(.5);
 
-      [secs, keyCode, deltaSecs] =KbWait;
-      escclose(keyCode);
+
+      % 20260102(HC req for SPA7T) - don't advance instructios on participant response
+      while 1
+          [secs, keyCode, deltaSecs] = KbWait;
+          escclose(keyCode);
+          if any(keyCode(keys.finger))
+             fprintf('# NB button glove key push, not advancing instruction\n')
+             continue
+          end
+          break
+      end
     end
 end
 
