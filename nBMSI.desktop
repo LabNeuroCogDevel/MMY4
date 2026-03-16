@@ -4,5 +4,5 @@ GenericName=nBMSI
 Comment=Congruent/InCongruent PsychoPy Task
 Exec=bash -c "source ~/.venv/bin/activate; cd ~/tasks/MMY4/; ./nBMSI.py"
 Type=Application
-Icon=application-x-desktop
+Icon=/home/lncd/tasks/MMY4/img/nBMSI.png
 Terminal=true
