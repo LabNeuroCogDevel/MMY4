@@ -15,6 +15,7 @@ from lncdtask import lncdtask
 from lncdtask.externalcom import ExternalCom, FileLogger, ParallelPortEEG
 from typing import Optional, Tuple
 
+LPT = None #: store acess to parallel port across many runs (continue to next via dialog box)
 
 def disp_cng_txt(rsp: int) -> str:
     """
@@ -652,7 +653,7 @@ def parse_args(argv):
     return parsed
 
 def run_block(participant, run_info):
-
+    global LPT
     printer = ExternalCom()
     logger = FileLogger()
     run_num = run_info.run_num()
@@ -690,9 +691,12 @@ def run_block(participant, run_info):
 
     # EEG trigger in data recording
     if run_info.info['LPTport']:
-        lpt = ParallelPortEEG(pp_address=run_info.info['LPTport'], lookup_func=nbmsi.ltp_lookup)
+        # linux holds onto the Parallel port. should release after run.
+        # but instead, hold onto it in a global variable
+        if LPT is None:
+            LPT = ParallelPortEEG(pp_address=run_info.info['LPTport'], lookup_func=nbmsi.ltp_lookup)
         # this goes first! most import timing is right for this
-        nbmsi.externals.prepend(lpt)
+        nbmsi.externals.prepend(LPT)
 
 
     # added after lpt
