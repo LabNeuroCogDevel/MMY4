@@ -716,6 +716,10 @@ def run_block(participant, run_info):
     nbmsi.msg(f"Finished run {run_info.run_num()}!")
     nbmsi.win.close()
 
+    if run_info.info['ButtonBox']:
+        # 20260420 - attempt to amilurate flush_serial_buffer() error on multiple runs
+        nbmsi.buttonbox.close()
+
 
 def run_nbmsi(parsed):
     """
@@ -840,6 +844,12 @@ class Cedrus():
                     print(f"BAD Buttonbox key press?! {resp_raw}")
 
         return (resp, ctime, bbtime)
+
+    def close(self):
+        """
+        Need to close connection to or self.dev.flush_serial_buffer() will eventualy fail
+        """
+        del self.dev
 
 
 def main():
